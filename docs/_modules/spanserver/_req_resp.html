@@ -1,0 +1,564 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>spanserver._req_resp &mdash; spanserver 0.7.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>spanserver._req_resp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for spanserver._req_resp</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">responder.models</span>
+<span class="kn">import</span> <span class="nn">responder.core</span>
+<span class="kn">import</span> <span class="nn">responder.api</span> <span class="k">as</span> <span class="nn">resp_api</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span> <span class="nn">responder.routes</span> <span class="k">as</span> <span class="nn">resp_routes</span>  <span class="c1"># noqa: F401</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">marshmallow</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+    <span class="n">Generic</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">FrozenSet</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">responder</span> <span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">_ResponderRequest</span><span class="p">,</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">_ResponderResponse</span>
+
+
+<span class="kn">from</span> <span class="nn">spantools</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MimeType</span><span class="p">,</span>
+    <span class="n">decode_content</span><span class="p">,</span>
+    <span class="n">PagingReq</span><span class="p">,</span>
+    <span class="n">PagingResp</span><span class="p">,</span>
+    <span class="n">MimeTypeTolerant</span><span class="p">,</span>
+    <span class="n">DecoderIndexType</span><span class="p">,</span>
+    <span class="n">EncoderIndexType</span><span class="p">,</span>
+    <span class="n">encode_content</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">spantools</span> <span class="kn">import</span> <span class="n">ContentDecodeError</span><span class="p">,</span> <span class="n">ContentEncodeError</span><span class="p">,</span> <span class="n">ContentTypeUnknownError</span>
+<span class="kn">from</span> <span class="nn">spantools.errors_api</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RequestValidationError</span><span class="p">,</span>
+    <span class="n">ResponseValidationError</span><span class="p">,</span>
+    <span class="n">NothingToReturnError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">._schema_info</span> <span class="kn">import</span> <span class="n">LoadOptions</span><span class="p">,</span> <span class="n">DumpOptions</span>
+
+
+<span class="n">FormatType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;Request&quot;</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span>
+<span class="n">MediaType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MediaType&quot;</span><span class="p">)</span>
+<span class="n">LoadedType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;LoadedType&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_NotLoadedFlag</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="n">NOT_LOADED</span> <span class="o">=</span> <span class="n">_NotLoadedFlag</span><span class="p">()</span>
+
+
+<span class="n">REQ_VALIDATION_ERROR_MESSAGE</span> <span class="o">=</span> <span class="s2">&quot;Request data does not match schema.&quot;</span>
+<span class="n">RESP_VALIDATION_ERROR_MESSAGE</span> <span class="o">=</span> <span class="s2">&quot;Error in response data.&quot;</span>
+
+
+<div class="viewcode-block" id="Request"><a class="viewcode-back" href="../../api_guide.html#spanserver.Request">[docs]</a><span class="k">class</span> <span class="nc">Request</span><span class="p">(</span><span class="n">_ResponderRequest</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">MediaType</span><span class="p">,</span> <span class="n">LoadedType</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">MediaType</span><span class="p">,</span> <span class="n">_NotLoadedFlag</span><span class="p">]]</span> <span class="o">=</span> <span class="n">NOT_LOADED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">LoadedType</span><span class="p">,</span> <span class="n">_NotLoadedFlag</span><span class="p">]]</span> <span class="o">=</span> <span class="n">NOT_LOADED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PagingReq</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoders</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DecoderIndexType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_options</span><span class="p">:</span> <span class="n">LoadOptions</span> <span class="o">=</span> <span class="n">LoadOptions</span><span class="o">.</span><span class="n">IGNORE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mimetype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Mimetype pulled from ``&#39;Content-Type&#39;`` request header.&quot;&quot;&quot;</span>
+        <span class="n">mimetype</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">mimetype</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">mimetype</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">mimetype</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">paging</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PagingReq</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns paging data pulled from url params.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Route is not paged&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">projection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a str, int dict of which fields to project into the response. 1 means</span>
+<span class="sd">        send field, 0 means remove field.</span>
+
+<span class="sd">        Projection specification is passed via query params. A url with:</span>
+<span class="sd">        ``&#39;?project.id=1&amp;project.data1=1&#39;`` would return a payload with ONLY the</span>
+<span class="sd">        ``id`` and ``data1`` fields.</span>
+
+<span class="sd">        ``&#39;?project.id=1&amp;project.data1=0&#39;`` would send back all fields except ``data1``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+            <span class="n">header</span><span class="p">:</span> <span class="nb">str</span>
+            <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
+
+            <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;project.&quot;</span><span class="p">):</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">8</span><span class="p">:]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span>
+                            <span class="s2">&quot;project values must be &#39;1&#39; or &#39;0&#39;&quot;</span>
+                        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span>
+
+<div class="viewcode-block" id="Request.media"><a class="viewcode-back" href="../../api_guide.html#spanserver.Request.media">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">media</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MediaType</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replacement for request&#39;s ``Request.media()``. Can handle bson with no special</span>
+<span class="sd">        modification, and loads through schema when desired.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NOT_LOADED</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_media</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">MediaType</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_options</span> <span class="ow">is</span> <span class="n">LoadOptions</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">):</span>
+            <span class="n">mimetype</span><span class="p">:</span> <span class="n">MimeTypeTolerant</span> <span class="o">=</span> <span class="n">schema</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mimetype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mimetype</span>
+
+        <span class="n">content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span>
+        <span class="k">if</span> <span class="n">content</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loaded</span><span class="p">,</span> <span class="n">mimetype_decoded</span> <span class="o">=</span> <span class="n">decode_content</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+                <span class="n">mimetype</span><span class="o">=</span><span class="n">mimetype</span><span class="p">,</span>
+                <span class="n">data_schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+                <span class="n">allow_sniff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">decoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_decoders</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span>
+                <span class="n">message</span><span class="o">=</span><span class="n">REQ_VALIDATION_ERROR_MESSAGE</span><span class="p">,</span> <span class="n">error_data</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">messages</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">ContentDecodeError</span><span class="p">,</span> <span class="n">ContentTypeUnknownError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span><span class="s2">&quot;Media could not be decoded.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_options</span> <span class="ow">is</span> <span class="n">LoadOptions</span><span class="o">.</span><span class="n">VALIDATE_ONLY</span><span class="p">:</span>
+            <span class="n">loaded</span> <span class="o">=</span> <span class="n">mimetype_decoded</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media</span> <span class="o">=</span> <span class="n">mimetype_decoded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span> <span class="o">=</span> <span class="n">loaded</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">MediaType</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media</span></div>
+
+<div class="viewcode-block" id="Request.media_loaded"><a class="viewcode-back" href="../../api_guide.html#spanserver.Request.media_loaded">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">media_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadedType</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Returns :func:`Request.media` data loaded through route schema.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span> <span class="ow">is</span> <span class="n">NOT_LOADED</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">media</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">LoadedType</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_media_loaded</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">ProjectionBuilder</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Handles building projection schemas for a route.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">route_method_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span> <span class="n">Schema</span> <span class="o">=</span> <span class="n">route_method_schema</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">route_method_schema</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hash</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">int</span>
+
+    <span class="k">def</span> <span class="nf">build_projection_schema</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_keys</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">:</span>
+        <span class="c1"># pass the route method hash so routes with similar schemas don&#39;t accidentally</span>
+        <span class="c1"># use the wrong schema base.</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_projection_schema</span><span class="p">(</span><span class="n">project_keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hash</span><span class="p">)</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_build_projection_schema</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_keys</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">route_hash</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a schema based on a client-requested projection. Implements an LRU</span>
+<span class="sd">        cache of the last 256 schemas generated to reduce the overhead of schema</span>
+<span class="sd">        initialization for popular projections.</span>
+
+<span class="sd">        ``route_hash`` only exists to help the lru cache seperate routes. It is not</span>
+<span class="sd">        used by the logic itself.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+
+        <span class="c1"># We need to start with the base schema settings. We don&#39;t want the client to</span>
+        <span class="c1"># be able to expand the fields beyond what the route restricts them to.</span>
+        <span class="n">only_original</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">only</span>
+        <span class="n">only</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">exclude</span><span class="p">)</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">user_only</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">project_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">exclude</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">user_only</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">only_original</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">only_original</span><span class="p">:</span>
+                    <span class="n">only</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span><span class="s2">&quot;Project values must be &#39;0&#39; or &#39;1&#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">user_only</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># If the user did not request any fields to keep, use the original schema&#39;s</span>
+            <span class="c1"># value.</span>
+            <span class="n">only_arg</span> <span class="o">=</span> <span class="n">only_original</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Otherwise, if they did, then use the built list.</span>
+            <span class="n">only_arg</span> <span class="o">=</span> <span class="n">only</span>
+
+        <span class="c1"># Init a new schema class.</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_class</span><span class="p">(</span>
+            <span class="n">only</span><span class="o">=</span><span class="n">only_arg</span><span class="p">,</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+            <span class="n">many</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">many</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">load_only</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">load_only</span><span class="p">,</span>
+            <span class="n">dump_only</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">dump_only</span><span class="p">,</span>
+            <span class="n">partial</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">partial</span><span class="p">,</span>
+            <span class="n">unknown</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">unknown</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">schema</span>
+
+
+<div class="viewcode-block" id="Response"><a class="viewcode-back" href="../../api_guide.html#spanserver.Response">[docs]</a><span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">_ResponderResponse</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mimetype</span><span class="p">:</span> <span class="n">MimeTypeTolerant</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_req_accept</span><span class="p">:</span> <span class="n">MimeTypeTolerant</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PagingResp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoders</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">EncoderIndexType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dump_options</span><span class="p">:</span> <span class="n">DumpOptions</span> <span class="o">=</span> <span class="n">DumpOptions</span><span class="o">.</span><span class="n">IGNORE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_projection_builder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ProjectionBuilder</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_projection</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">paging</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PagingResp</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Response paging information for response headers. Only ``total_items`` must be</span>
+<span class="sd">        set for all other fields to be included in response.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Route is not paged&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paging</span>
+
+    <span class="k">def</span> <span class="nf">_dump_media</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">content</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">validate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resp_calculate_dump_settings</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dump_options</span> <span class="ow">is</span> <span class="n">DumpOptions</span><span class="o">.</span><span class="n">VALIDATE_ONLY</span><span class="p">:</span>
+            <span class="n">errors</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ResponseValidationError</span><span class="p">(</span>
+                    <span class="n">RESP_VALIDATION_ERROR_MESSAGE</span><span class="p">,</span> <span class="n">error_data</span><span class="o">=</span><span class="n">errors</span>
+                <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">encode_content</span><span class="p">(</span>
+                <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+                <span class="n">mimetype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">data_schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+                <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
+                <span class="n">encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoders</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">raise</span> <span class="n">ResponseValidationError</span><span class="p">(</span>
+                <span class="n">RESP_VALIDATION_ERROR_MESSAGE</span><span class="p">,</span> <span class="n">error_data</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">messages</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">ContentEncodeError</span><span class="p">,</span> <span class="n">ContentTypeUnknownError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">raise</span> <span class="n">ResponseValidationError</span><span class="p">(</span><span class="s2">&quot;Error Encoding Response&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+
+    <span class="k">def</span> <span class="nf">_resp_calculate_mimetype_and_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]:</span>
+        <span class="n">accept</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_req_accept</span>
+        <span class="k">if</span> <span class="n">accept</span> <span class="o">==</span> <span class="s2">&quot;*/*&quot;</span><span class="p">:</span>
+            <span class="n">accept</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">accept</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">=</span> <span class="n">accept</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">):</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span>
+
+        <span class="k">return</span> <span class="n">schema</span>
+
+    <span class="k">def</span> <span class="nf">_resp_calculate_undumped_content</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">media</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">media</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span>
+
+        <span class="k">return</span> <span class="n">content</span>
+
+    <span class="k">def</span> <span class="nf">_resp_calculate_dump_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resp_calculate_mimetype_and_schema</span><span class="p">()</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resp_calculate_undumped_content</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">content</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="p">{},</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">NothingToReturnError</span><span class="p">(</span><span class="s2">&quot;No Data to Return&quot;</span><span class="p">)</span>
+
+        <span class="n">validate</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dump_options</span> <span class="ow">is</span> <span class="n">DumpOptions</span><span class="o">.</span><span class="n">DUMP_AND_VALIDATE</span><span class="p">:</span>
+            <span class="n">validate</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dump_options</span> <span class="ow">is</span> <span class="n">DumpOptions</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
+            <span class="n">validate</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_projection</span><span class="p">:</span>
+            <span class="c1"># Frozen set is a hashable type, so we can use it as a cache key, unlike</span>
+            <span class="c1"># dict.</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection_builder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">projection_keys</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_projection</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection_builder</span><span class="o">.</span><span class="n">build_projection_schema</span><span class="p">(</span><span class="n">projection_keys</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection_builder</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projection</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span><span class="s2">&quot;End point does not support projection.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="n">schema</span><span class="p">,</span> <span class="n">validate</span></div>
+
+
+<span class="c1"># We need to monkey-patch responder&#39;s Request class with our own subclass of it so we</span>
+<span class="c1"># can add bson support.</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">Request</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">Request</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">Request</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">Request</span>
+<span class="n">resp_api</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Request</span> <span class="o">=</span> <span class="n">Request</span>
+
+<span class="n">responder</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">Response</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">Response</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">Response</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">Response</span>
+<span class="n">resp_api</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">Response</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

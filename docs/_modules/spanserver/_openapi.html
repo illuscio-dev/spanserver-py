@@ -1,0 +1,1044 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>spanserver._openapi &mdash; spanserver 0.7.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>spanserver._openapi</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for spanserver._openapi</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">marshmallow</span>
+<span class="kn">import</span> <span class="nn">gemma</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">inflect</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">apispec</span>
+<span class="kn">import</span> <span class="nn">responder.ext.schema</span>
+<span class="kn">import</span> <span class="nn">responder.api</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+    <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+    <span class="n">overload</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">spantools</span> <span class="kn">import</span> <span class="n">MimeType</span>
+<span class="kn">from</span> <span class="nn">spantools.errors_api</span> <span class="kn">import</span> <span class="n">RequestValidationError</span>
+
+
+<span class="k">class</span> <span class="nc">OpenAPISchema</span><span class="p">(</span><span class="n">responder</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extension of responder&#39;s schema class to handle tags.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_apispec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">apispec</span><span class="o">.</span><span class="n">APISpec</span><span class="p">:</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_apispec</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+            <span class="n">spec</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spec</span>
+
+
+<span class="c1"># Override responder&#39;s schema with our class.</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">ext</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">OpenAPISchema</span>
+<span class="n">responder</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">OpenAPISchema</span> <span class="o">=</span> <span class="n">OpenAPISchema</span>
+
+
+<span class="n">ParamDecoderType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ParamDecoderType&quot;</span><span class="p">)</span>
+
+
+<span class="n">INFLECT</span> <span class="o">=</span> <span class="n">inflect</span><span class="o">.</span><span class="n">engine</span><span class="p">()</span>
+
+
+<span class="c1"># Param Info Classes #####</span>
+<span class="c1"># These classes help flag what params should be expected</span>
+
+
+<div class="viewcode-block" id="ParamTypes"><a class="viewcode-back" href="../../api_guide.html#spanserver.ParamTypes">[docs]</a><span class="k">class</span> <span class="nc">ParamTypes</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;PATH&quot;</span>
+    <span class="n">QUERY</span> <span class="o">=</span> <span class="s2">&quot;QUERY&quot;</span>
+    <span class="n">HEADER</span> <span class="o">=</span> <span class="s2">&quot;HEADER&quot;</span></div>
+
+
+<span class="n">DEFAULT_RESP_CODE</span> <span class="o">=</span> <span class="mi">5000000000</span>
+
+
+<span class="c1"># STRING FORMATTING FUNCTIONS.</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">fix_descriptions</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">fix_descriptions</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="k">def</span> <span class="nf">fix_descriptions</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Makes sure that a description starts with a capital letter and ends with a period</span>
+<span class="sd">    for consistency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">description</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="s2">&quot;!&#39;</span><span class="se">\&quot;</span><span class="s2">:?.&quot;</span><span class="p">]:</span>
+        <span class="n">description</span> <span class="o">+=</span> <span class="s2">&quot;.&quot;</span>
+
+    <span class="n">first_letter</span> <span class="o">=</span> <span class="n">description</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">capitalized</span> <span class="o">=</span> <span class="n">first_letter</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+
+    <span class="n">description</span> <span class="o">=</span> <span class="n">capitalized</span> <span class="o">+</span> <span class="n">description</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">description</span>
+
+
+<span class="k">def</span> <span class="nf">camel_case_split</span><span class="p">(</span><span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span>
+        <span class="s2">&quot;.+?(?:(?&lt;=[a-z])(?=[A-Z])|(?&lt;=[A-Z])(?=[A-Z][a-z])|$)&quot;</span><span class="p">,</span> <span class="n">string</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">proper_plural_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inflect sometimes gets plural conversion wrong when there are capital letters, so</span>
+<span class="sd">    we need to lower the word then reinsert the capitals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">camel_case_split</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="n">last_word</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">plural</span> <span class="o">=</span> <span class="n">INFLECT</span><span class="o">.</span><span class="n">plural</span><span class="p">(</span><span class="n">last_word</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="n">combined</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">original</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">last_word</span><span class="p">,</span> <span class="n">plural</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">original</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">original</span> <span class="ow">and</span> <span class="n">original</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">new</span><span class="p">:</span>
+            <span class="n">combined</span> <span class="o">+=</span> <span class="n">original</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">combined</span> <span class="o">+=</span> <span class="n">new</span>
+
+    <span class="n">combined</span> <span class="o">+=</span> <span class="n">plural</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span> <span class="p">:]</span>  <span class="c1"># noqa: E203</span>
+
+    <span class="n">words</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+    <span class="n">new_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">new_tag</span>
+
+
+<span class="k">def</span> <span class="nf">_separate_description_summary</span><span class="p">(</span><span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="n">docstring_parts</span> <span class="o">=</span> <span class="n">docstring</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">docstring_parts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">docstring_parts</span><span class="p">:</span>
+        <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docstring_parts</span><span class="p">)</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">summary</span><span class="p">,</span> <span class="n">description</span>
+
+
+<span class="c1"># OPENAPI DATA OBJECTS #####</span>
+
+
+<div class="viewcode-block" id="ParamInfo"><a class="viewcode-back" href="../../api_guide.html#spanserver.ParamInfo">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ParamInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parameter detail.&quot;&quot;&quot;</span>
+
+    <span class="n">param_type</span><span class="p">:</span> <span class="n">ParamTypes</span>
+    <span class="sd">&quot;&quot;&quot;Type of parameter.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="sd">&quot;&quot;&quot;Name of parameter.&quot;&quot;&quot;</span>
+
+    <span class="n">decode_types</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot;Python types for decoding from string.&quot;&quot;&quot;</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Description of parameter.&quot;&quot;&quot;</span>
+
+    <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="sd">&quot;&quot;&quot;Whether the parameter is required.&quot;&quot;&quot;</span>
+
+    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Default value used if the parameter is not passed.&quot;&quot;&quot;</span>
+
+    <span class="nb">max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Maximum allowed value of the parameter.&quot;&quot;&quot;</span>
+
+    <span class="nb">min</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Minimum allowed value of the parameter.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">load_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">decoder</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_types</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">decoder</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">raise</span> <span class="n">RequestValidationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;URL param </span><span class="si">{self.name}</span><span class="s2"> could not be cast to </span><span class="si">{decoder}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">openapi_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+        <span class="n">schema_format_block</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">decode_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_types</span><span class="p">:</span>
+            <span class="n">this_type</span><span class="p">,</span> <span class="n">this_format</span> <span class="o">=</span> <span class="n">PARAM_SCHEMA_TRANSLATOR</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">decode_type</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="n">decode_type</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+            <span class="p">)</span>
+
+            <span class="n">format_block</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">this_type</span><span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">this_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">format_block</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">this_format</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">),</span> <span class="n">decode_type</span><span class="p">):</span>
+                <span class="n">format_block</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span>
+
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">decode_type</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">:</span>
+                    <span class="n">format_block</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+                    <span class="n">format_block</span><span class="p">[</span><span class="s2">&quot;maximum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span>
+
+            <span class="n">schema_format_block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">format_block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema_format_block</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">schema_block</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;anyOf&quot;</span><span class="p">:</span> <span class="n">schema_format_block</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">schema_block</span> <span class="o">=</span> <span class="n">schema_format_block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">param_block</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">schema_block</span><span class="p">,</span>
+            <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="n">param_block</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+
+        <span class="k">return</span> <span class="n">param_block</span></div>
+
+
+<div class="viewcode-block" id="DocRespInfo"><a class="viewcode-back" href="../../api_guide.html#spanserver.DocRespInfo">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DocRespInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Documentation information about method responses.&quot;&quot;&quot;</span>
+
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Description of the response code.&quot;&quot;&quot;</span>
+    <span class="n">example</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Example of response payload.&quot;&quot;&quot;</span>
+    <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ParamInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Response Headers Details.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span></div>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ApiTag</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Tag information.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="sd">&quot;&quot;&quot;Name of tag.&quot;&quot;&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="sd">&quot;&quot;&quot;Tag Description.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DocInfo"><a class="viewcode-back" href="../../api_guide.html#spanserver.DocInfo">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DocInfo</span><span class="p">:</span>
+    <span class="n">req_example</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="sd">&quot;&quot;&quot;Example request body data.&quot;&quot;&quot;</span>
+    <span class="n">req_params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ParamInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Request parameter details.&quot;&quot;&quot;</span>
+    <span class="n">responses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">DocRespInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Response codes and details.&quot;&quot;&quot;</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Tags for this method.&quot;&quot;&quot;</span></div>
+
+
+<span class="c1"># OPENAPI Construction Functions #####</span>
+
+
+<span class="k">def</span> <span class="nf">reformat_spanroute_docstring</span><span class="p">(</span><span class="n">api</span><span class="p">:</span> <span class="s2">&quot;SpanAPI&quot;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="s2">&quot;SpanRoute&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Responder allows the definition of a route&#39;s openapi documentation in it&#39;s</span>
+<span class="sd">    docstring. This function takes the route and any schema information, data examples,</span>
+<span class="sd">    and paging info, and turns it into the proper OpenAPI spec.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># combine docstrings</span>
+    <span class="k">if</span> <span class="n">route</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">docstring</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">docstring</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()):</span>
+        <span class="c1"># We do not need to do anything if the main section has an api docstring</span>
+        <span class="c1"># already</span>
+        <span class="k">return</span>
+
+    <span class="n">methods_openapi</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">route</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">method_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;on_&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;on_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">schema_info</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RouteSchemaInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">method_schema_info</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">schema_info</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">method_openapi</span> <span class="o">=</span> <span class="n">_build_method</span><span class="p">(</span>
+            <span class="n">http_method</span><span class="o">=</span><span class="n">method_name</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">handler</span><span class="p">,</span>
+            <span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="n">route</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">methods_openapi</span><span class="p">[</span><span class="n">method_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">method_openapi</span>
+
+    <span class="n">methods_doc_string</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">methods_openapi</span><span class="p">)</span>
+    <span class="n">docstring</span> <span class="o">=</span> <span class="n">docstring</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">methods_doc_string</span>
+
+    <span class="n">route</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">docstring</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_handler_docstring_spec</span><span class="p">(</span><span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">handler</span><span class="o">.</span><span class="vm">__doc__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">method_yaml</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">method_doc</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">handler</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loaded</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">method_doc</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">:</span>
+            <span class="n">loaded</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">summary</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="n">_separate_description_summary</span><span class="p">(</span>
+                    <span class="n">docstring</span><span class="o">=</span><span class="n">method_doc</span>
+                <span class="p">)</span>
+                <span class="n">method_yaml</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">}</span>
+                <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">method_yaml</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">method_yaml</span> <span class="o">=</span> <span class="n">loaded</span>
+
+    <span class="k">return</span> <span class="n">method_yaml</span>
+
+
+<span class="k">def</span> <span class="nf">_is_error_code</span><span class="p">(</span><span class="n">http_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determines if an http status code denotes an error. The current implementation</span>
+<span class="sd">    assumes any code between 400 and 599 is an error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">http_code</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span> <span class="ow">or</span> <span class="n">http_code</span> <span class="o">==</span> <span class="n">DEFAULT_RESP_CODE</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_set_error_headers</span><span class="p">(</span><span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">for</span> <span class="n">status</span><span class="p">,</span> <span class="n">response_info</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">status</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error-name&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Human-readable error name.&quot;</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="s2">&quot;APIError&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error-message&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message containing information about the error.&quot;</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="s2">&quot;An unknown error has occurred.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error-code&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;An API error code that identifies the error-type.&quot;</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error-data&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">&quot;JSON-serialized data about the error. For instance: request body &quot;</span>
+                    <span class="s2">&quot;validation errors will return a dict with details about all &quot;</span>
+                    <span class="s2">&quot;offending fields.&quot;</span>
+                <span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;error-id&quot;</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">&quot;A unique ID with details about this error. Please reference when &quot;</span>
+                    <span class="s2">&quot;reporting errors.&quot;</span>
+                <span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_set_paging_params</span><span class="p">(</span><span class="n">method_handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">paged_limit</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">method_handler</span><span class="p">,</span> <span class="s2">&quot;paged_limit&quot;</span><span class="p">)</span>
+    <span class="n">paged_offset</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">method_handler</span><span class="p">,</span> <span class="s2">&quot;paged_offset&quot;</span><span class="p">)</span>
+
+    <span class="c1"># REQ PAGING PARAMS #######</span>
+    <span class="n">doc_info</span><span class="o">.</span><span class="n">req_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ParamInfo</span><span class="p">(</span>
+            <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-offset&quot;</span><span class="p">,</span>
+            <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Index of first item to be returned in response body&quot;</span><span class="p">),</span>
+            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">paged_offset</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">doc_info</span><span class="o">.</span><span class="n">req_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">ParamInfo</span><span class="p">(</span>
+            <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-limit&quot;</span><span class="p">,</span>
+            <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Maximum number of items allowed in response body.&quot;</span><span class="p">),</span>
+            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="nb">max</span><span class="o">=</span><span class="n">paged_limit</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># RESP PAGING PARAMS #######</span>
+    <span class="c1"># If there are no documented responses, we are going to assume a default response</span>
+    <span class="c1"># code of 200, and apply paging info to that.</span>
+    <span class="k">for</span> <span class="n">http_code</span><span class="p">,</span> <span class="n">response_config</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">http_code</span><span class="p">):</span>
+            <span class="k">continue</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-offset&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Index of first item returned in response body&quot;</span><span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">paged_offset</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-limit&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Maximum number of items allowed in response body.&quot;</span><span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="nb">max</span><span class="o">=</span><span class="n">paged_limit</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-total-items&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;Total number of items that match request.&quot;</span><span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-current-page&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">&quot;Page number of item set in response body given current &quot;</span>
+                    <span class="s2">&quot;limit-per-page.&quot;</span>
+                <span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-previous&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;URL to previous page.&quot;</span><span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-next&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;URL to next page.&quot;</span><span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">response_config</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">ParamInfo</span><span class="p">(</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">HEADER</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-total-pages&quot;</span><span class="p">,</span>
+                <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                    <span class="s2">&quot;Total number of pages that match request given current &quot;</span>
+                    <span class="s2">&quot;limit-per-page.&quot;</span>
+                <span class="p">),</span>
+                <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_apply_example_data</span><span class="p">(</span>
+    <span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">example_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">]],</span>
+    <span class="n">resp_code</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">)</span> <span class="ow">and</span> <span class="n">example_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">example_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">example_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">example_data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">JSON</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">content_type</span> <span class="o">=</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">TEXT</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">if</span> <span class="n">resp_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">course</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">gemma</span><span class="o">.</span><span class="n">PORT</span>
+            <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">resp_code</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">course</span> <span class="o">=</span> <span class="n">gemma</span><span class="o">.</span><span class="n">PORT</span> <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;requestBody&quot;</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="n">course</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">course</span>
+        <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">content_type</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;example&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">course</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">example_data</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_apply_examples</span><span class="p">(</span>
+    <span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;RouteSchemaInfo&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">req_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">schema_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="n">_apply_example_data</span><span class="p">(</span>
+            <span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span>
+            <span class="n">example_data</span><span class="o">=</span><span class="n">doc_info</span><span class="o">.</span><span class="n">req_example</span><span class="p">,</span>
+            <span class="n">schema</span><span class="o">=</span><span class="n">schema_info</span><span class="o">.</span><span class="n">req_schema</span><span class="p">,</span>
+            <span class="n">resp_code</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">response_info</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">response_info</span><span class="o">.</span><span class="n">example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">schema_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_apply_example_data</span><span class="p">(</span>
+                <span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span>
+                <span class="n">example_data</span><span class="o">=</span><span class="n">response_info</span><span class="o">.</span><span class="n">example</span><span class="p">,</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">schema_info</span><span class="o">.</span><span class="n">resp_schema</span><span class="p">,</span>
+                <span class="n">resp_code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+            <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_apply_schema_to_code</span><span class="p">(</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">],</span>
+    <span class="n">schema_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">http_block</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">req_resp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># We don&#39;t apply schemas to error codes.</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">types_course</span> <span class="o">=</span> <span class="n">gemma</span><span class="o">.</span><span class="n">PORT</span> <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">http_block</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">req_resp</span> <span class="o">==</span> <span class="s2">&quot;resp&quot;</span><span class="p">:</span>
+        <span class="n">types_course</span> <span class="o">=</span> <span class="n">types_course</span> <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="n">types_course</span> <span class="o">=</span> <span class="n">types_course</span> <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">types_blocks</span> <span class="o">=</span> <span class="n">types_course</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">gemma</span><span class="o">.</span><span class="n">NullNameError</span><span class="p">:</span>
+        <span class="c1"># If there are not listed content types, that means no example data was</span>
+        <span class="c1"># applied, so we need to generate the type blocks.</span>
+        <span class="n">types_blocks</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+            <span class="n">types_blocks</span><span class="p">[</span><span class="n">MimeType</span><span class="o">.</span><span class="n">JSON</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">types_blocks</span><span class="p">[</span><span class="n">MimeType</span><span class="o">.</span><span class="n">TEXT</span><span class="o">.</span><span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">types_course</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">types_blocks</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">type_block</span> <span class="ow">in</span> <span class="n">types_blocks</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+            <span class="n">schema_link</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{schema_name}</span><span class="s2">&quot;</span>
+            <span class="n">type_block</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="n">schema_link</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">type_block</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_apply_schema</span><span class="p">(</span>
+    <span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">:</span> <span class="s2">&quot;RouteSchemaInfo&quot;</span><span class="p">,</span> <span class="n">req_resp</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">req_resp</span> <span class="o">==</span> <span class="s2">&quot;req&quot;</span><span class="p">:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">req_schema</span>
+        <span class="n">schema_name</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">req_name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">resp_schema</span>
+        <span class="n">schema_name</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">resp_name</span>
+
+    <span class="c1"># We know the API has already assigned a name at this point, so we don&#39;t need to</span>
+    <span class="c1"># worry about it being None.</span>
+    <span class="n">schema_name</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">schema_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">req_resp</span> <span class="o">==</span> <span class="s2">&quot;req&quot;</span><span class="p">:</span>
+        <span class="n">http_block</span> <span class="o">=</span> <span class="s2">&quot;requestBody&quot;</span>
+        <span class="n">resp_codes</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">http_block</span> <span class="o">=</span> <span class="s2">&quot;responses&quot;</span>
+        <span class="n">resp_codes</span> <span class="o">=</span> <span class="p">[</span><span class="n">code</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]]</span>
+
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">resp_codes</span><span class="p">:</span>
+        <span class="n">_apply_schema_to_code</span><span class="p">(</span>
+            <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span>
+            <span class="n">schema_name</span><span class="o">=</span><span class="n">schema_name</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">http_block</span><span class="o">=</span><span class="n">http_block</span><span class="p">,</span>
+            <span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span>
+            <span class="n">req_resp</span><span class="o">=</span><span class="n">req_resp</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">tag_name_from_schema</span><span class="p">(</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="n">schema_class</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__class__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">schema_class</span> <span class="o">=</span> <span class="n">schema</span>
+
+    <span class="n">tag_name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">schema_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">tag_name</span> <span class="o">=</span> <span class="n">proper_plural_tag</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tag_name</span>
+
+
+<span class="k">def</span> <span class="nf">_apply_schema_tags</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">:</span> <span class="s2">&quot;RouteSchemaInfo&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># We prefer the request schema if it exists.</span>
+    <span class="n">tag_schema</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema_info</span><span class="o">.</span><span class="n">req_schema</span><span class="p">,</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+        <span class="n">tag_schema</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">req_schema</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema_info</span><span class="o">.</span><span class="n">resp_schema</span><span class="p">,</span> <span class="n">marshmallow</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+        <span class="n">tag_schema</span> <span class="o">=</span> <span class="n">schema_info</span><span class="o">.</span><span class="n">resp_schema</span>
+
+    <span class="c1"># Auto-generate a tag group based on the schema name, and pluralize it.</span>
+    <span class="c1"># NameSchema -&gt; Names</span>
+    <span class="c1"># Job -&gt; Jobs</span>
+    <span class="k">if</span> <span class="n">tag_schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="n">method_yaml</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+        <span class="n">tag_name</span> <span class="o">=</span> <span class="n">tag_name_from_schema</span><span class="p">(</span><span class="n">tag_schema</span><span class="p">)</span>
+
+        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_apply_schemas</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">:</span> <span class="s2">&quot;RouteSchemaInfo&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">_apply_schema</span><span class="p">(</span><span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span><span class="p">,</span> <span class="n">req_resp</span><span class="o">=</span><span class="s2">&quot;req&quot;</span><span class="p">)</span>
+    <span class="n">_apply_schema</span><span class="p">(</span><span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span><span class="p">,</span> <span class="n">req_resp</span><span class="o">=</span><span class="s2">&quot;resp&quot;</span><span class="p">)</span>
+
+    <span class="c1"># auto-tag methods based on schemas</span>
+    <span class="n">_apply_schema_tags</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">)</span>
+
+
+<span class="n">PARAM_SCHEMA_TRANSLATOR</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nb">str</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="nb">bool</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;boolean&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="nb">int</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;integer&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="nb">float</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;number&quot;</span><span class="p">,</span> <span class="s2">&quot;float&quot;</span><span class="p">),</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;date&quot;</span><span class="p">),</span>
+    <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;date-time&quot;</span><span class="p">),</span>
+    <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;uuid&quot;</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_apply_params</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># REQ PARAMS</span>
+    <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">param_info</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">req_params</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="o">.</span><span class="n">openapi_spec</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+        <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span>
+
+    <span class="c1"># RESP PARAMS</span>
+    <span class="k">for</span> <span class="n">http_code</span><span class="p">,</span> <span class="n">response_info</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">param_info</span> <span class="ow">in</span> <span class="n">response_info</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+            <span class="n">param_block</span> <span class="o">=</span> <span class="n">param_info</span><span class="o">.</span><span class="n">openapi_spec</span><span class="p">()</span>
+            <span class="n">param_block</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">)</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="n">param_block</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+            <span class="n">headers</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_block</span>
+
+        <span class="k">if</span> <span class="n">headers</span><span class="p">:</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">gemma</span><span class="o">.</span><span class="n">PORT</span>
+                <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">http_code</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">course</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_create_doc_info_for_docstring_responses</span><span class="p">(</span>
+    <span class="n">existing_responses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">for</span> <span class="n">existing_code</span><span class="p">,</span> <span class="n">existing_response</span> <span class="ow">in</span> <span class="n">existing_responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">http_code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">existing_code</span><span class="p">)</span>
+        <span class="n">existing_description</span> <span class="o">=</span> <span class="n">existing_response</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+
+        <span class="n">response_info</span> <span class="o">=</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">http_code</span><span class="p">,</span> <span class="n">DocRespInfo</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">existing_description</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="n">existing_description</span><span class="p">)</span>
+
+        <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="p">[</span><span class="n">http_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_info</span>
+
+
+<span class="k">def</span> <span class="nf">_handler_create_responses</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">existing_responses</span> <span class="o">=</span> <span class="n">method_yaml</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+    <span class="n">all_defined</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">existing_responses</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="p">]</span>
+
+    <span class="c1"># If no responses are defined, we create a default ok response.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">code</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">all_defined</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">code</span><span class="p">)):</span>
+        <span class="n">existing_responses</span><span class="p">[</span><span class="mi">200</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="c1"># If no error responses are defined, we create a default error response. This</span>
+    <span class="c1"># response code will be subbed out later for a &quot;Default&quot; error code.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">code</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">all_defined</span> <span class="k">if</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">code</span><span class="p">)):</span>
+        <span class="n">existing_responses</span><span class="p">[</span><span class="n">DEFAULT_RESP_CODE</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="n">_create_doc_info_for_docstring_responses</span><span class="p">(</span><span class="n">existing_responses</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">)</span>
+
+    <span class="c1"># Now we go through and create or merge documentation info that was hand-typed into</span>
+    <span class="c1"># the docstring with the DocInfo object in the route&#39;s &quot;Document&quot; class.</span>
+    <span class="k">for</span> <span class="n">http_code</span><span class="p">,</span> <span class="n">response_info</span> <span class="ow">in</span> <span class="n">doc_info</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_block</span> <span class="o">=</span> <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="n">http_code</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">course</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">gemma</span><span class="o">.</span><span class="n">PORT</span>
+                <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">gemma</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">http_code</span><span class="p">,</span> <span class="n">factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">response_block</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">course</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">response_block</span><span class="p">)</span>
+
+        <span class="c1"># Apply generic descriptions to those missing it.</span>
+        <span class="k">if</span> <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">http_code</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+                <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Created.&quot;</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">_is_error_code</span><span class="p">(</span><span class="n">http_code</span><span class="p">):</span>
+                <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Ok.&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">response_info</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Error.&quot;</span>
+
+        <span class="n">response_block</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_info</span><span class="o">.</span><span class="n">description</span>
+
+
+<span class="k">def</span> <span class="nf">_build_method</span><span class="p">(</span>
+    <span class="n">http_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">schema_info</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;RouteSchemaInfo&quot;</span><span class="p">],</span>
+    <span class="n">route</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="s2">&quot;SpanRoute&quot;</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+    <span class="n">method_yaml</span> <span class="o">=</span> <span class="n">_extract_handler_docstring_spec</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="n">doc_info</span><span class="p">:</span> <span class="n">DocInfo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">Document</span><span class="p">,</span> <span class="n">http_method</span><span class="p">)</span>
+
+    <span class="n">_handler_create_responses</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="s2">&quot;paged&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">_handler_set_paging_params</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">)</span>
+
+    <span class="n">_handler_set_error_headers</span><span class="p">(</span><span class="n">doc_info</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">schema_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_handler_apply_examples</span><span class="p">(</span>
+            <span class="n">method_yaml</span><span class="o">=</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">doc_info</span><span class="o">=</span><span class="n">doc_info</span><span class="p">,</span> <span class="n">schema_info</span><span class="o">=</span><span class="n">schema_info</span>
+        <span class="p">)</span>
+        <span class="n">_handler_apply_schemas</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">)</span>
+
+    <span class="n">_handler_apply_params</span><span class="p">(</span><span class="n">method_yaml</span><span class="p">,</span> <span class="n">doc_info</span><span class="p">)</span>
+
+    <span class="n">responses</span> <span class="o">=</span> <span class="n">method_yaml</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">DEFAULT_RESP_CODE</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+        <span class="n">responses</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">DEFAULT_RESP_CODE</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">method_yaml</span>
+
+
+<span class="n">typing_help</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">typing_help</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">._api</span> <span class="kn">import</span> <span class="n">SpanAPI</span><span class="p">,</span> <span class="n">RouteSchemaInfo</span>
+    <span class="kn">from</span> <span class="nn">._route</span> <span class="kn">import</span> <span class="n">SpanRoute</span>  <span class="c1"># noqa: F401</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

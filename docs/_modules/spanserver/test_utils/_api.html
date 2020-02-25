@@ -1,0 +1,429 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>spanserver.test_utils._api &mdash; spanserver 0.7.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>spanserver.test_utils._api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for spanserver.test_utils._api</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">from</span> <span class="nn">grahamcracker</span> <span class="kn">import</span> <span class="n">schema_for</span><span class="p">,</span> <span class="n">DataSchema</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">bson</span> <span class="kn">import</span> <span class="n">InvalidBSON</span><span class="p">,</span> <span class="n">InvalidDocument</span>
+
+<span class="kn">from</span> <span class="nn">spantools</span> <span class="kn">import</span> <span class="n">Error</span><span class="p">,</span> <span class="n">PagingResp</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">,</span> <span class="n">MimeTypeTolerant</span><span class="p">,</span> <span class="n">decode_content</span>
+<span class="kn">from</span> <span class="nn">spantools.errors_api</span> <span class="kn">import</span> <span class="n">APIError</span>
+
+<span class="kn">from</span> <span class="nn">._errors</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">StatusMismatchError</span><span class="p">,</span>
+    <span class="n">PagingMismatchError</span><span class="p">,</span>
+    <span class="n">WrongExceptionError</span><span class="p">,</span>
+    <span class="n">DataValidationError</span><span class="p">,</span>
+    <span class="n">ContentDecodeError</span><span class="p">,</span>
+    <span class="n">TextValidationError</span><span class="p">,</span>
+    <span class="n">HeadersMismatchError</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="nd">@schema_for</span><span class="p">(</span><span class="n">Error</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">_ErrorSchema</span><span class="p">(</span><span class="n">DataSchema</span><span class="p">[</span><span class="n">Error</span><span class="p">]):</span>
+    <span class="k">pass</span>
+
+
+<span class="n">_ERROR_SCHEMA</span> <span class="o">=</span> <span class="n">_ErrorSchema</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_status</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">valid_status_codes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">valid_status_codes</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">valid_status_codes</span> <span class="o">=</span> <span class="p">(</span><span class="n">valid_status_codes</span><span class="p">,)</span>
+
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_status_codes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">StatusMismatchError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Got status code: </span><span class="si">{response.status_code}</span><span class="s2">. Expected: </span><span class="si">{valid_status_codes}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_print_response_data</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESPONSE:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JSON:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CONTENT:&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="validate_error"><a class="viewcode-back" href="../../../api_guide.html#spanserver.test_utils.validate_error">[docs]</a><span class="k">def</span> <span class="nf">validate_error</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">error_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">APIError</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Error</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates response contains correct error info, prints response and headers for</span>
+<span class="sd">    test logs.</span>
+
+<span class="sd">    :param response: from test client.</span>
+<span class="sd">    :param error_type: APIError class that returned error should correspond to.</span>
+
+<span class="sd">    :raises NoErrorReturnedError: No error information in response headers.</span>
+<span class="sd">    :raises StatusMismatchError: Response http code does not match ``error_type``.</span>
+<span class="sd">    :raises WrongExceptionError: Error data does not match ``error_type``.</span>
+
+<span class="sd">    :return: error data model.</span>
+
+<span class="sd">    Response status code and data are printed to stdout for log capture.</span>
+
+<span class="sd">    All exceptions are inherited from :class:`ResponseValidationError`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_print_response_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="n">error</span> <span class="o">=</span> <span class="n">Error</span><span class="o">.</span><span class="n">from_headers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">error</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">error_type</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">assert</span> <span class="n">error</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">error_type</span><span class="o">.</span><span class="n">api_code</span>
+        <span class="k">assert</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">WrongExceptionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{error_type.__name__}</span><span class="s2">. Got </span><span class="si">{error.name}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">_validate_status</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">error_type</span><span class="o">.</span><span class="n">http_code</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">error</span></div>
+
+
+<span class="k">def</span> <span class="nf">_validate_response_content</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">data_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">data_schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mimetype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MimeTypeTolerant</span><span class="p">]</span> <span class="o">=</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">mimetype</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">loaded</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">decode_content</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+            <span class="n">mimetype</span><span class="o">=</span><span class="n">mimetype</span><span class="p">,</span>
+            <span class="n">data_schema</span><span class="o">=</span><span class="n">data_schema</span><span class="p">,</span>
+            <span class="n">allow_sniff</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loaded</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="n">InvalidBSON</span><span class="p">,</span> <span class="n">InvalidDocument</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ContentDecodeError</span><span class="p">(</span><span class="s2">&quot;Could not load response data.&quot;</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">ValidationError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DataValidationError</span><span class="p">(</span><span class="s2">&quot;Error validating returned data&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_data</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="n">data_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+
+    <span class="k">if</span> <span class="n">text_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">!=</span> <span class="n">text_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TextValidationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got &#39;</span><span class="si">{response.text}</span><span class="s2">&#39;, expected &#39;</span><span class="si">{data}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_validate_response_content</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">data_schema</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_headers</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span> <span class="n">expected_headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">expected_headers</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">expected_headers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HeadersMismatchError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{k}</span><span class="s2"> not in headers&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">HeadersMismatchError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Header </span><span class="si">{k}</span><span class="s2"> has value </span><span class="si">{response.headers[k]}</span><span class="s2">, not </span><span class="si">{v}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_validate_paging</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="n">expected_paging</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PagingResp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">paging_urls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">expected_paging</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">received_paging</span> <span class="o">=</span> <span class="n">PagingResp</span><span class="o">.</span><span class="n">from_headers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+
+        <span class="n">expected_values</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">expected_paging</span><span class="p">)</span>
+        <span class="n">received_values</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="n">received_paging</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paging_urls</span><span class="p">:</span>
+            <span class="n">expected_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span>
+            <span class="n">expected_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;previous&quot;</span><span class="p">)</span>
+
+            <span class="n">received_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;next&quot;</span><span class="p">)</span>
+            <span class="n">received_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;previous&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">expected_values</span> <span class="o">!=</span> <span class="n">received_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PagingMismatchError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Received values do not match expected values.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Received:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{received_values}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{expected_values}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+
+<div class="viewcode-block" id="validate_response"><a class="viewcode-back" href="../../../api_guide.html#spanserver.test_utils.validate_response">[docs]</a><span class="k">def</span> <span class="nf">validate_response</span><span class="p">(</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span><span class="p">,</span>
+    <span class="n">valid_status_codes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="n">data_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">text_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">expected_headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">expected_paging</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PagingResp</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">paging_urls</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate response object from test client. For use when writing tests.</span>
+
+<span class="sd">    :param response: from test client.</span>
+<span class="sd">    :param valid_status_codes: Status code(s) expected.</span>
+<span class="sd">    :param data_schema: used for loading data.</span>
+<span class="sd">    :param text_value: if text return expected, the expected text value.</span>
+<span class="sd">    :param expected_headers: dict of expected headers.</span>
+<span class="sd">    :param expected_paging: Paging object with expected values.</span>
+<span class="sd">    :param paging_urls: Whether to check the URLs of the paging object. Default is</span>
+<span class="sd">        ``True``.</span>
+
+<span class="sd">    :return: Loaded Data.</span>
+
+<span class="sd">    :raises StatusMismatchError: Response http code does not match</span>
+<span class="sd">        ``valid_status_codes``.</span>
+<span class="sd">    :raises TextValidationError: Response.text does not match ``text_value``.</span>
+<span class="sd">    :raises DataLoadError: Content could not be loaded as dict / bson.</span>
+<span class="sd">    :raises DataValidationError: Loaded data does not match schema.</span>
+<span class="sd">    :raises HeadersMismatchError: Response header values missing / different from</span>
+<span class="sd">        ``expected_headers``. Additional values are allowed. Only passed values are</span>
+<span class="sd">        checked.</span>
+
+<span class="sd">    This function tests that:</span>
+
+<span class="sd">        - Status code comes back as expected.</span>
+
+<span class="sd">        - Data can be loaded by passed schema.</span>
+
+<span class="sd">        - Header values match expected.</span>
+
+<span class="sd">        - Text data matches expected value.</span>
+
+<span class="sd">    Response status code and data are printed to stdout for log capture.</span>
+
+<span class="sd">    All exceptions are inherited from :class:`ResponseValidationError`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_print_response_data</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="n">_validate_status</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">valid_status_codes</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_validate_data</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">data_schema</span><span class="p">,</span> <span class="n">text_value</span><span class="p">)</span>
+    <span class="n">_validate_headers</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">expected_headers</span><span class="p">)</span>
+    <span class="n">_validate_paging</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">expected_paging</span><span class="p">,</span> <span class="n">paging_urls</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
