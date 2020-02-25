@@ -9,7 +9,7 @@ services that focus on sending and receiving structured data.
 
 ## Getting Started
 For full documentation:
-[read the docs](https://illuscio-dev.github.io/islelib-py/).
+[read the docs](https://illuscio-dev.github.io/spanserver-py/).
 
 For library development guide, 
 [read the docs](https://illuscio-dev.github.io/islelib-py/).
