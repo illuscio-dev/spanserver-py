@@ -1,0 +1,649 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>spanserver._api &mdash; spanserver 0.7.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>spanserver._api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for spanserver._api</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">urllib.parse</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">responder</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">PathLike</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span> <span class="nn">grahamcracker</span> <span class="kn">import</span> <span class="n">URLStr</span>
+
+<span class="kn">from</span> <span class="nn">spantools</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MimeType</span><span class="p">,</span>
+    <span class="n">MimeTypeTolerant</span><span class="p">,</span>
+    <span class="n">PagingReq</span><span class="p">,</span>
+    <span class="n">PagingResp</span><span class="p">,</span>
+    <span class="n">DEFAULT_ENCODERS</span><span class="p">,</span>
+    <span class="n">DEFAULT_DECODERS</span><span class="p">,</span>
+    <span class="n">DecoderType</span><span class="p">,</span>
+    <span class="n">EncoderType</span><span class="p">,</span>
+    <span class="n">DecoderIndexType</span><span class="p">,</span>
+    <span class="n">EncoderIndexType</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">spantools.errors_api</span> <span class="kn">import</span> <span class="n">APILimitError</span>
+
+<span class="kn">from</span> <span class="nn">._route</span> <span class="kn">import</span> <span class="n">SpanRoute</span>
+<span class="kn">from</span> <span class="nn">._req_resp</span> <span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">ProjectionBuilder</span>
+<span class="kn">from</span> <span class="nn">._openapi</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">reformat_spanroute_docstring</span><span class="p">,</span>
+    <span class="n">tag_name_from_schema</span><span class="p">,</span>
+    <span class="n">ParamInfo</span><span class="p">,</span>
+    <span class="n">ParamTypes</span><span class="p">,</span>
+    <span class="n">fix_descriptions</span><span class="p">,</span>
+    <span class="n">OpenAPISchema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._schema_info</span> <span class="kn">import</span> <span class="n">RouteSchemaInfo</span><span class="p">,</span> <span class="n">LoadOptions</span><span class="p">,</span> <span class="n">DumpOptions</span>
+
+
+<span class="n">HandlersDictType</span> <span class="o">=</span> <span class="n">Type</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Schema</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">Field</span><span class="p">]]</span>
+<span class="n">ModelIndex</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]</span>
+
+
+<span class="n">SchemaType</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Schema</span><span class="p">],</span> <span class="n">MimeType</span><span class="p">]]</span>
+<span class="n">SchemaTypeInit</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">]]</span>
+
+
+<span class="k">class</span> <span class="nc">_Default</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="n">DEFAULT</span> <span class="o">=</span> <span class="n">_Default</span><span class="p">()</span>
+<span class="n">_Other</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_Other&quot;</span><span class="p">)</span>
+<span class="n">DefaultType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">_Default</span><span class="p">,</span> <span class="n">_Other</span><span class="p">]</span>
+
+
+<span class="n">PAGED_LIMIT_PARAM</span> <span class="o">=</span> <span class="n">ParamInfo</span><span class="p">(</span>
+    <span class="n">param_type</span><span class="o">=</span><span class="n">ParamTypes</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;paging-limit&quot;</span><span class="p">,</span>
+    <span class="n">decode_types</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of items to return per page. Default &quot;</span><span class="p">,</span>
+    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SpanAPI"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI">[docs]</a><span class="k">class</span> <span class="nc">SpanAPI</span><span class="p">(</span><span class="n">responder</span><span class="o">.</span><span class="n">API</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``responder.API`` extension for data-driven micro-services</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">auto_escape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">openapi</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">docs_route</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">allowed_hosts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="p">:</span> <span class="n">OpenAPISchema</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">allowed_hosts</span><span class="o">=</span><span class="n">allowed_hosts</span><span class="p">,</span>
+            <span class="n">openapi</span><span class="o">=</span><span class="n">openapi</span><span class="p">,</span>
+            <span class="n">docs_route</span><span class="o">=</span><span class="n">docs_route</span><span class="p">,</span>
+            <span class="n">auto_escape</span><span class="o">=</span><span class="n">auto_escape</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">route_schema_info</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RouteSchemaInfo</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoders</span><span class="p">:</span> <span class="n">DecoderIndexType</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">DEFAULT_ENCODERS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoders</span><span class="p">:</span> <span class="n">EncoderIndexType</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">DEFAULT_DECODERS</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SpanAPI.add_route"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.add_route">[docs]</a>    <span class="k">def</span> <span class="nf">add_route</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">route</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">static</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">check_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">websocket</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">before_request</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">SpanRoute</span><span class="p">):</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">[</span><span class="n">SpanRoute</span><span class="p">],</span> <span class="n">endpoint</span><span class="p">)</span>
+            <span class="n">endpoint</span><span class="o">.</span><span class="n">wrap_methods</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="n">decoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_decoders</span><span class="p">,</span> <span class="n">encoders</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoders</span>
+            <span class="p">)</span>
+
+            <span class="n">reformat_spanroute_docstring</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span>
+            <span class="n">route</span><span class="o">=</span><span class="n">route</span><span class="p">,</span>
+            <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">static</span><span class="o">=</span><span class="n">static</span><span class="p">,</span>
+            <span class="n">check_existing</span><span class="o">=</span><span class="n">check_existing</span><span class="p">,</span>
+            <span class="n">websocket</span><span class="o">=</span><span class="n">websocket</span><span class="p">,</span>
+            <span class="n">before_request</span><span class="o">=</span><span class="n">before_request</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpanAPI.openapi_save"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.openapi_save">[docs]</a>    <span class="k">def</span> <span class="nf">openapi_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Save openapi.yaml file to ``path``&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="o">.</span><span class="n">openapi</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpanAPI.redoc_save"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.redoc_save">[docs]</a>    <span class="k">def</span> <span class="nf">redoc_save</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path_openapi</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">],</span> <span class="n">path_redoc</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PathLike</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save openapi.yaml file to ``path`` then generate ReDoc bundled api at</span>
+<span class="sd">        ``path_redoc``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">openapi_save</span><span class="p">(</span><span class="n">path_openapi</span><span class="p">)</span>
+
+        <span class="n">commands</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;npx&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;redoc-cli&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bundle&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;{str(path_openapi)}&#39;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;&#39;{str(path_redoc)}&#39;&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
+        <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_add_schema_to_api</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">schema</span><span class="p">:</span> <span class="n">SchemaTypeInit</span><span class="p">,</span>
+        <span class="n">passed_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">req_resp</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">passed_name</span>
+
+        <span class="k">if</span> <span class="n">passed_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="o">.</span><span class="n">add_schema</span><span class="p">(</span><span class="n">passed_name</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">passed_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;on_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+            <span class="n">schema_name</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Schema&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{schema_name}{method_name}{req_resp}{i}</span><span class="s2">&quot;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="o">.</span><span class="n">add_schema</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+        <span class="n">schema_type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="n">tag_name</span> <span class="o">=</span> <span class="n">tag_name_from_schema</span><span class="p">(</span><span class="n">schema_type</span><span class="p">)</span>
+        <span class="n">tag_description</span> <span class="o">=</span> <span class="n">fix_descriptions</span><span class="p">(</span><span class="n">schema_type</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tag_description</span><span class="p">:</span>
+            <span class="n">tag_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">tag_name</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">tag_description</span><span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tag_name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="o">.</span><span class="n">tags</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">openapi</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag_info</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">_save_schema_info</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">endpoint_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">schema_info</span><span class="p">:</span> <span class="n">RouteSchemaInfo</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">endpoint_method</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">route_schema_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema_info</span>
+
+    <span class="k">def</span> <span class="nf">method_schema_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RouteSchemaInfo</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">endpoint_method</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">route_schema_info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SpanAPI.use_schema"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.use_schema">[docs]</a>    <span class="k">def</span> <span class="nf">use_schema</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">req</span><span class="p">:</span> <span class="n">SchemaType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">req_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">req_load</span><span class="p">:</span> <span class="n">LoadOptions</span> <span class="o">=</span> <span class="n">LoadOptions</span><span class="o">.</span><span class="n">VALIDATE_AND_LOAD</span><span class="p">,</span>
+        <span class="n">resp</span><span class="p">:</span> <span class="n">SchemaType</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">resp_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">resp_dump</span><span class="p">:</span> <span class="n">DumpOptions</span> <span class="o">=</span> <span class="n">DumpOptions</span><span class="o">.</span><span class="n">DUMP_ONLY</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decorator for :class:`SpanRoute` methods to automatically validate incoming</span>
+<span class="sd">        request data based on a given model.</span>
+
+<span class="sd">        :param req: schema for request json data.</span>
+<span class="sd">        :param req_name: name for request schema.</span>
+<span class="sd">        :param req_load: loading options for req schema.</span>
+
+<span class="sd">            - **VALIDATE_AND_LOAD**: Default. Loads and validates incoming data using</span>
+<span class="sd">              the schema&#39;s ``loads`` method.</span>
+
+<span class="sd">            - **VALIDATE_ONLY**: Validates incoming data, but passes raw dict to</span>
+<span class="sd">              ``data`` param in route method.</span>
+
+<span class="sd">            - **PASS_THROUGH**: Passes json data into ``data`` param of route, but does</span>
+<span class="sd">              not validate or load it.</span>
+
+<span class="sd">            - **IGNORE**: Uses ``req`` schema for documentation, but does nothing with</span>
+<span class="sd">              incoming data at runtime -- default responder behavior.</span>
+
+<span class="sd">        :param resp: schema for response json data.</span>
+<span class="sd">        :param resp_name: name for response schema.</span>
+<span class="sd">        :param resp_dump: loading options for req schema</span>
+
+<span class="sd">            - **DUMP_ONLY**: Default. Dumps data using the schema&#39;s ``dump`` method.</span>
+<span class="sd">              Only minimal validation is done during this process. See Marshmallow&#39;s</span>
+<span class="sd">              documentation for details.</span>
+
+<span class="sd">            - **VALIDATE_ONLY**: Validates outgoing data but does not dump it.</span>
+
+<span class="sd">            - **VALIDATE_AND_DUMP**: Validates outdoing data, then dumps it.</span>
+
+<span class="sd">            - **IGNORE**: Uses ``resp`` schema for documentation, but does nothing with</span>
+<span class="sd">              outgoing data at runtime -- default responder behavior.</span>
+
+<span class="sd">        A ``data`` param can be added to the decorated method which data from</span>
+<span class="sd">        ``req.media()`` will be passed into based on the ``req_load`` option above.</span>
+
+<span class="sd">        Using ``spanreed.flag.TEXT`` as the response or request schema indicates that</span>
+<span class="sd">        data will be loaded or sent back from req.text rather than req.media, and</span>
+<span class="sd">        openapi documentation will be tweaked accordingly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">schema_req</span> <span class="o">=</span> <span class="n">_init_schema</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+        <span class="n">schema_resp</span> <span class="o">=</span> <span class="n">_init_schema</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+
+        <span class="c1"># Add a projection builder for dynamically generating schemas based on client</span>
+        <span class="c1"># requests</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema_resp</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+            <span class="n">projection_builder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ProjectionBuilder</span><span class="p">]</span> <span class="o">=</span> <span class="n">ProjectionBuilder</span><span class="p">(</span>
+                <span class="n">schema_resp</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">projection_builder</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">route_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+
+            <span class="n">req_name_api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_schema_to_api</span><span class="p">(</span>
+                <span class="n">schema_req</span><span class="p">,</span> <span class="n">req_name</span><span class="p">,</span> <span class="n">route_method</span><span class="p">,</span> <span class="s2">&quot;Req&quot;</span>
+            <span class="p">)</span>
+            <span class="n">resp_name_api</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_add_schema_to_api</span><span class="p">(</span>
+                <span class="n">schema_resp</span><span class="p">,</span> <span class="n">resp_name</span><span class="p">,</span> <span class="n">route_method</span><span class="p">,</span> <span class="s2">&quot;Resp&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">schema_options</span> <span class="o">=</span> <span class="n">RouteSchemaInfo</span><span class="p">(</span>
+                <span class="n">_req</span><span class="o">=</span><span class="n">schema_req</span><span class="p">,</span>
+                <span class="n">req_name</span><span class="o">=</span><span class="n">req_name_api</span><span class="p">,</span>
+                <span class="n">req_load</span><span class="o">=</span><span class="n">req_load</span><span class="p">,</span>
+                <span class="n">_resp</span><span class="o">=</span><span class="n">schema_resp</span><span class="p">,</span>
+                <span class="n">resp_name</span><span class="o">=</span><span class="n">resp_name_api</span><span class="p">,</span>
+                <span class="n">resp_dump</span><span class="o">=</span><span class="n">resp_dump</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">route_method</span><span class="p">)</span>
+            <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span>
+                <span class="c1"># Since we are wrapping class functions, &quot;self&quot; needs to be the first</span>
+                <span class="c1"># parameter</span>
+                <span class="n">route</span><span class="p">:</span> <span class="n">SpanRoute</span><span class="p">,</span>
+                <span class="n">http_req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+                <span class="n">http_resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># validate the incoming data if a model was provided.</span>
+                <span class="n">http_req</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">schema_options</span><span class="o">.</span><span class="n">req_schema</span>
+                <span class="n">http_req</span><span class="o">.</span><span class="n">_load_options</span> <span class="o">=</span> <span class="n">schema_options</span><span class="o">.</span><span class="n">req_load</span>
+
+                <span class="n">http_resp</span><span class="o">.</span><span class="n">_schema</span> <span class="o">=</span> <span class="n">schema_options</span><span class="o">.</span><span class="n">resp_schema</span>
+                <span class="n">http_resp</span><span class="o">.</span><span class="n">_dump_options</span> <span class="o">=</span> <span class="n">schema_options</span><span class="o">.</span><span class="n">resp_dump</span>
+                <span class="n">http_resp</span><span class="o">.</span><span class="n">_projection_builder</span> <span class="o">=</span> <span class="n">projection_builder</span>
+                <span class="c1"># await schema_options.load_req(http_req)</span>
+
+                <span class="c1"># pass loaded data into the actual route method if applicable. Await the</span>
+                <span class="c1"># response.</span>
+                <span class="k">await</span> <span class="n">route_method</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">http_req</span><span class="p">,</span> <span class="n">http_resp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="c1"># validate / dump response data.</span>
+                <span class="c1"># schema_options.dump_response(http_resp=http_resp, http_req=http_req)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_schema_info</span><span class="p">(</span><span class="n">route_method</span><span class="p">,</span> <span class="n">schema_options</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">wrapper</span>
+
+        <span class="k">return</span> <span class="n">decorator</span></div>
+
+<div class="viewcode-block" id="SpanAPI.paged"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.paged">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">paged</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default_offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decorator to handle paging for :class:`SpanRoute` method.</span>
+
+<span class="sd">        :param limit: max items a user can request</span>
+
+<span class="sd">        Assumes the possibility of ``paging-offset`` and ``paging-limit`` url params.</span>
+<span class="sd">        Passes :class:`Paging` object into request and response ``paging`` attributes``.</span>
+
+<span class="sd">        Paging information, including urls for the next / previous page are added to the</span>
+<span class="sd">        response headers for all decorated routes.</span>
+
+<span class="sd">        If ``paging.total_items`` must be set inside the route, all other paging</span>
+<span class="sd">        attributes will be automatically generated based on the total item count.</span>
+
+<span class="sd">        :raises APILimitError: If requested ``paging-limit`` url param is above</span>
+<span class="sd">            ``limit``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">route_method</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+            <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">route_method</span><span class="p">)</span>
+            <span class="k">async</span> <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span>
+                <span class="n">inst</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="n">paging_req</span> <span class="o">=</span> <span class="n">PagingReq</span><span class="o">.</span><span class="n">from_params</span><span class="p">(</span>
+                    <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">default_offset</span><span class="o">=</span><span class="n">default_offset</span><span class="p">,</span> <span class="n">default_limit</span><span class="o">=</span><span class="n">limit</span>
+                <span class="p">)</span>
+                <span class="n">paging_resp</span><span class="p">:</span> <span class="n">PagingResp</span> <span class="o">=</span> <span class="n">_set_up_paging_resp</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">app_limit</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span>
+                <span class="n">req</span><span class="o">.</span><span class="n">_paging</span> <span class="o">=</span> <span class="n">paging_req</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">_paging</span> <span class="o">=</span> <span class="n">paging_resp</span>
+                <span class="k">await</span> <span class="n">route_method</span><span class="p">(</span><span class="n">inst</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">_adjust_paging_totals</span><span class="p">(</span><span class="n">paging_resp</span><span class="p">)</span>
+
+                <span class="n">paging_resp</span><span class="o">.</span><span class="n">to_headers</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+
+            <span class="n">wrapper</span><span class="o">.</span><span class="n">paged</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># type: ignore</span>
+            <span class="n">wrapper</span><span class="o">.</span><span class="n">paged_limit</span> <span class="o">=</span> <span class="n">limit</span>  <span class="c1"># type: ignore</span>
+            <span class="n">wrapper</span><span class="o">.</span><span class="n">paged_offset</span> <span class="o">=</span> <span class="n">default_offset</span>  <span class="c1"># type: ignore</span>
+
+            <span class="k">return</span> <span class="n">wrapper</span>
+
+        <span class="k">return</span> <span class="n">decorator</span></div>
+
+<div class="viewcode-block" id="SpanAPI.register_mimetype"><a class="viewcode-back" href="../../api_guide.html#spanserver.SpanAPI.register_mimetype">[docs]</a>    <span class="k">def</span> <span class="nf">register_mimetype</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mimetype</span><span class="p">:</span> <span class="n">MimeTypeTolerant</span><span class="p">,</span> <span class="n">encoder</span><span class="p">:</span> <span class="n">EncoderType</span><span class="p">,</span> <span class="n">decoder</span><span class="p">:</span> <span class="n">DecoderType</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers encoder and decoder function for a given mimetype.</span>
+
+<span class="sd">        :param mimetype: to register for ex: ``&#39;text/csv&#39;``.</span>
+<span class="sd">        :param encoder: Encodes mimetype data to binary.</span>
+<span class="sd">        :param decoder: Decodes mimetype data to binary.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mimetype</span> <span class="o">=</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">from_name</span><span class="p">(</span><span class="n">mimetype</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoders</span><span class="p">[</span><span class="n">mimetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoders</span><span class="p">[</span><span class="n">mimetype</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_init_schema</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">SchemaType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Schema</span><span class="p">,</span> <span class="n">MimeType</span><span class="p">]]:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">schema</span>
+
+
+<span class="k">def</span> <span class="nf">_replace_paging_info</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="n">URLStr</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">URLStr</span><span class="p">:</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;paging-offset&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="s2">&quot;paging-limit&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">)}</span>
+
+    <span class="n">url_parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">parse_qsl</span><span class="p">(</span><span class="n">url_parts</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+    <span class="n">query</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="n">url_parts</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">urlunparse</span><span class="p">(</span><span class="n">url_parts</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_set_up_paging_resp</span><span class="p">(</span><span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">app_limit</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PagingResp</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Sets up paging info based on request.&quot;&quot;&quot;</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;paging-offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">user_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;paging-limit&quot;</span><span class="p">,</span> <span class="n">app_limit</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">user_limit</span> <span class="o">&gt;</span> <span class="n">app_limit</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">APILimitError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;item limit for </span><span class="si">{req.method}</span><span class="s2"> </span><span class="si">{req.full_url}</span><span class="s2"> is </span><span class="si">{app_limit}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{user_limit}</span><span class="s2"> requested.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">next_url</span> <span class="o">=</span> <span class="n">_replace_paging_info</span><span class="p">(</span>
+        <span class="n">req</span><span class="o">.</span><span class="n">full_url</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span> <span class="o">+</span> <span class="n">user_limit</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">user_limit</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="o">-</span> <span class="n">user_limit</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">previous_url</span> <span class="o">=</span> <span class="n">_replace_paging_info</span><span class="p">(</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">full_url</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span> <span class="o">-</span> <span class="n">user_limit</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">user_limit</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">previous_url</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">current</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">offset</span> <span class="o">/</span> <span class="n">user_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="n">paging</span> <span class="o">=</span> <span class="n">PagingResp</span><span class="p">(</span>
+        <span class="n">previous</span><span class="o">=</span><span class="n">previous_url</span><span class="p">,</span>
+        <span class="nb">next</span><span class="o">=</span><span class="n">next_url</span><span class="p">,</span>
+        <span class="n">current_page</span><span class="o">=</span><span class="n">current</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">user_limit</span><span class="p">,</span>
+        <span class="n">total_items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">total_pages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">paging</span>
+
+
+<span class="k">def</span> <span class="nf">_adjust_paging_totals</span><span class="p">(</span><span class="n">paging</span><span class="p">:</span> <span class="n">PagingResp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adjusts total pages based on total items supplied by route. Removes url to next page</span>
+<span class="sd">    if necessary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">paging</span><span class="o">.</span><span class="n">total_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">paging</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">paging</span><span class="o">.</span><span class="n">limit</span> <span class="o">&gt;=</span> <span class="n">paging</span><span class="o">.</span><span class="n">total_items</span><span class="p">:</span>
+            <span class="n">paging</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">paging</span><span class="o">.</span><span class="n">total_pages</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">paging</span><span class="o">.</span><span class="n">total_items</span> <span class="o">/</span> <span class="n">paging</span><span class="o">.</span><span class="n">limit</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

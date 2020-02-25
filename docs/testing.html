@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Testing Utilities &mdash; spanserver 0.7.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generating Documentation" href="docing.html" />
+    <link rel="prev" title="Quick Start" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#testing-basics">Testing Basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validating-responses">Validating Responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validating-errors">Validating Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Testing Utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/testing.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="testing-utilities">
+<h1>Testing Utilities<a class="headerlink" href="#testing-utilities" title="Permalink to this headline">¶</a></h1>
+<p>Spanserver comes with some testing</p>
+<div class="section" id="testing-basics">
+<h2>Testing Basics<a class="headerlink" href="#testing-basics" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="https://python-responder.org/en/latest/tour.html#using-requests-test-client">responder’s documentation</a> for testing basics.</p>
+</div>
+<div class="section" id="validating-responses">
+<h2>Validating Responses<a class="headerlink" href="#validating-responses" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">test_utils.validate_response()</span></code> can validate all the basic features of a response:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">test_utils</span>
+
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/enemies&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">req</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(),</span> <span class="n">resp</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">())</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">[</span><span class="n">RecordType</span><span class="p">,</span> <span class="n">Enemy</span><span class="p">],</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">media_loaded</span><span class="p">()</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">201</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">data</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/enemies&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">})</span>
+
+<span class="n">test_utils</span><span class="o">.</span><span class="n">validate_response</span><span class="p">(</span>
+    <span class="n">r</span><span class="p">,</span>
+    <span class="n">valid_status_codes</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span>
+    <span class="n">data_schema</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(),</span>
+    <span class="n">expected_headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;35&quot;</span>
+<span class="p">}</span>
+<span class="n">JSON</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In this example the following was checked:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Response status was 201</p></li>
+<li><p>Response content could be loaded by <code class="docutils literal notranslate"><span class="pre">EnemySchema()</span></code></p></li>
+<li><p>Response has a <code class="docutils literal notranslate"><span class="pre">'Content-Type'</span></code> header with a value of <code class="docutils literal notranslate"><span class="pre">'application/json'</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>The response code, headers, and content are printed during the validation process.</p>
+<p>If any of these criteria were to fail, an error is thrown:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/enemies&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">})</span>
+
+<span class="n">test_utils</span><span class="o">.</span><span class="n">validate_response</span><span class="p">(</span>
+    <span class="n">r</span><span class="p">,</span>
+    <span class="n">valid_status_codes</span><span class="o">=</span><span class="mi">201</span><span class="p">,</span>
+    <span class="n">data_schema</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(),</span>
+    <span class="n">expected_headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RESPONSE</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">400</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;RequestValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Request data does not match schema.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;d4ecfc47-210c-418f-b96f-9a0b6aea6f1c&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">name</span><span class="se">\&quot;</span><span class="s2">: [</span><span class="se">\&quot;</span><span class="s2">Missing data for required field.</span><span class="se">\&quot;</span><span class="s2">]}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+<span class="n">JSON</span><span class="p">:</span>
+<span class="n">null</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="n">spanserver</span><span class="o">...</span><span class="n">StatusMismatchError</span><span class="p">:</span> <span class="n">Got</span> <span class="n">status</span> <span class="n">code</span><span class="p">:</span> <span class="mf">400.</span> <span class="n">Expected</span><span class="p">:</span> <span class="p">(</span><span class="mi">201</span><span class="p">,)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="validating-errors">
+<h2>Validating Errors<a class="headerlink" href="#validating-errors" title="Permalink to this headline">¶</a></h2>
+<p>When an API error is expected in the response headers, <code class="xref py py-func docutils literal notranslate"><span class="pre">test_utils.validate_error()</span></code>
+can be used to validate that the correct error has been returned.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">errors_api</span>
+
+<span class="n">error</span> <span class="o">=</span> <span class="n">test_utils</span><span class="o">.</span><span class="n">validate_error</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">error_type</span><span class="o">=</span><span class="n">errors_api</span><span class="o">.</span><span class="n">RequestValidationError</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR DATA:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RESPONSE</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">400</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;RequestValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Request data does not match schema.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;d4ecfc47-210c-418f-b96f-9a0b6aea6f1c&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">name</span><span class="se">\&quot;</span><span class="s2">: [</span><span class="se">\&quot;</span><span class="s2">Missing data for required field.</span><span class="se">\&quot;</span><span class="s2">]}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+<span class="n">JSON</span><span class="p">:</span>
+<span class="n">null</span>
+
+<span class="n">ERROR</span> <span class="n">DATA</span><span class="p">:</span> <span class="n">Error</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;RequestValidationError&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;Request data does not ...</span>
+</pre></div>
+</div>
+<p>When the correct error is not encountered, an error is raised:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">test_utils</span><span class="o">.</span><span class="n">validate_error</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">error_type</span><span class="o">=</span><span class="n">errors_api</span><span class="o">.</span><span class="n">NothingToReturnError</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RESPONSE</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">400</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;RequestValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Request data does not match schema.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;d4ecfc47-210c-418f-b96f-9a0b6aea6f1c&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">name</span><span class="se">\&quot;</span><span class="s2">: [</span><span class="se">\&quot;</span><span class="s2">Missing data for required field.</span><span class="se">\&quot;</span><span class="s2">]}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+<span class="n">JSON</span><span class="p">:</span>
+<span class="n">null</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="o">....</span><span class="n">WrongExceptionError</span><span class="p">:</span> <span class="n">Expected</span> <span class="n">NothingToReturnError</span><span class="o">.</span> <span class="n">Got</span> <span class="n">RequestValidationError</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="docing.html" class="btn btn-neutral float-right" title="Generating Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quick Start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
