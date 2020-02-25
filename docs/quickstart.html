@@ -1,0 +1,1058 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quick Start &mdash; spanserver 0.7.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Testing Utilities" href="testing.html" />
+    <link rel="prev" title="SpanServer" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> spanserver
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.7.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#declaring-a-service">Declaring a Service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#routing-requests">Routing Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#response-errors">Response Errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#content-type-encoding">Content-Type Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#content-type-sniffing">Content-Type Sniffing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#content-type-handlers">Content-Type Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#request-data-validation">Request Data Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#request-schema-loadoptions">Request Schema LoadOptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#response-data-serialization">Response Data Serialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#response-schema-options">Response Schema Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#response-data-projection">Response Data Projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#url-param-typing">URL Param Typing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#paging">Paging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docing.html">Generating Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_guide.html">API Guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">spanserver</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Quick Start</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-spanserver"></span><div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="declaring-a-service">
+<h2>Declaring a Service<a class="headerlink" href="#declaring-a-service" title="Permalink to this headline">¶</a></h2>
+<p>Declare a service with <a class="reference internal" href="api_guide.html#spanserver.SpanAPI" title="spanserver.SpanAPI"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpanAPI</span></code></a>, an extension of <code class="docutils literal notranslate"><span class="pre">API</span></code> from <a class="reference external" href="https://python-responder.org/en/latest/">responder</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">SpanAPI</span>
+
+<span class="n">grievous</span> <span class="o">=</span> <span class="n">SpanAPI</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">grievous</span></code> now has access to a number of convenience features from spanserver.</p>
+</div>
+<div class="section" id="routing-requests">
+<h2>Routing Requests<a class="headerlink" href="#routing-requests" title="Permalink to this headline">¶</a></h2>
+<p>To use responder’s feature set, routes <em>MUST BE</em> declared via a subclass of
+<a class="reference internal" href="api_guide.html#spanserver.SpanRoute" title="spanserver.SpanRoute"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpanRoute</span></code></a>. Methods are added via <a class="reference external" href="https://python-responder.org/en/latest/tour.html#class-based-views">Responder’s class-view routing convention</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">SpanRoute</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/greet&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Greet</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;{data.upper()}!&quot;</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/greet&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s2">&quot;General Kenobi&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;STATUS CODE:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESP TEXT:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>STATUS CODE: 200
+RESP TEXT: GENERAL KENOBI!
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>All methods for <a class="reference internal" href="api_guide.html#spanserver.SpanRoute" title="spanserver.SpanRoute"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpanRoute</span></code></a> must be declared as <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">def</span> <span class="pre">on_method(...</span></code>.
+Non-async routes will not function properly.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is recommended that users be familiar with the <a class="reference external" href="https://python-responder.org/en/latest/">responder</a> framework before
+continuing this guide.</p>
+</div>
+</div>
+<div class="section" id="response-errors">
+<h2>Response Errors<a class="headerlink" href="#response-errors" title="Permalink to this headline">¶</a></h2>
+<p>Error information is reported in the response headers. Generic errors
+are cast to <a class="reference internal" href="api_guide.html#spanserver.errors_api.APIError" title="spanserver.errors_api.APIError"><code class="xref py py-class docutils literal notranslate"><span class="pre">errors_api.APIError</span></code></a>. Error information (including a traceback)
+is also printed to stderr by the service.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Greet</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Some Unforseen Error&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="n">b1c12e0</span><span class="o">-</span><span class="n">b062</span><span class="o">-</span><span class="mi">4</span><span class="n">d66</span><span class="o">-</span><span class="mi">92</span><span class="n">cf</span><span class="o">-</span><span class="mi">66</span><span class="n">fb0c50788d</span><span class="p">)</span> <span class="o">-</span> <span class="n">APIError</span> <span class="s2">&quot;An unknown error occurred&quot;</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Some</span> <span class="n">Unforseen</span> <span class="n">Error</span>
+
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;APIError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;An unknown error occurred&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;4b1c12e0-b062-4d66-92cf-66fb0c50788d&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1000&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Any error that inherits from <a class="reference internal" href="api_guide.html#spanserver.errors_api.APIError" title="spanserver.errors_api.APIError"><code class="xref py py-class docutils literal notranslate"><span class="pre">errors_api.APIError</span></code></a> will pass its class name,
+api_code, and any supplied error data back through the response headers.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">errors_api</span>
+
+
+<span class="k">class</span> <span class="nc">CustomError</span><span class="p">(</span><span class="n">errors_api</span><span class="o">.</span><span class="n">APIError</span><span class="p">):</span>
+    <span class="n">http_code</span> <span class="o">=</span> <span class="mi">401</span>
+    <span class="n">api_code</span> <span class="o">=</span> <span class="mi">2001</span>
+
+
+<span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Greet</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">CustomError</span><span class="p">(</span><span class="s2">&quot;Handled gracefully&quot;</span><span class="p">,</span> <span class="n">error_data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">})</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="n">b91983e</span><span class="o">-</span><span class="mi">779</span><span class="n">d</span><span class="o">-</span><span class="mi">40</span><span class="n">cc</span><span class="o">-</span><span class="mi">95</span><span class="n">b2</span><span class="o">-</span><span class="n">c7758a68b27f</span><span class="p">)</span> <span class="o">-</span> <span class="n">CustomError</span> <span class="s2">&quot;Handled gracefully&quot;</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="n">CustomError</span><span class="p">:</span> <span class="n">Handled</span> <span class="n">gracefully</span>
+
+<span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">401</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;CustomError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Handled gracefully&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;0b91983e-779d-40cc-95b2-c7758a68b27f&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;2001&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">key</span><span class="se">\&quot;</span><span class="s2">: </span><span class="se">\&quot;</span><span class="s2">value</span><span class="se">\&quot;</span><span class="s2">}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The status code of the response is altered to the error class’ <code class="docutils literal notranslate"><span class="pre">http_code</span></code> value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any errors that manifest in the deeper code of <a class="reference external" href="https://python-responder.org/en/latest/">responder</a> or its ASGI engine,
+<a class="reference external" href="https://www.starlette.io/">starlette</a> will not get this neat error data, and instead return a default <code class="docutils literal notranslate"><span class="pre">501</span></code>
+error with a brief message.</p>
+</div>
+<p>When an error occurs, the payload of the response is set to none (a blank byte string).
+If you want to attempt to send back a payload, set <code class="docutils literal notranslate"><span class="pre">send_media=</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> when
+initializing the error. SpanServer will attempt to serialize the payload as long as
+no serialization errors occur, and the original error being handled was not a
+serialization error.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Greet</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;some&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}</span>
+        <span class="k">raise</span> <span class="n">CustomError</span><span class="p">(</span><span class="s2">&quot;Sending Data&quot;</span><span class="p">,</span> <span class="n">send_media</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/error&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATA:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="n">b91983e</span><span class="o">-</span><span class="mi">779</span><span class="n">d</span><span class="o">-</span><span class="mi">40</span><span class="n">cc</span><span class="o">-</span><span class="mi">95</span><span class="n">b2</span><span class="o">-</span><span class="n">c7758a68b27f</span><span class="p">)</span> <span class="o">-</span> <span class="n">CustomError</span> <span class="s2">&quot;Sending Data&quot;</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="n">CustomError</span><span class="p">:</span> <span class="n">Sending</span> <span class="n">Data</span>
+
+<span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">401</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">DATA</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;some&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="content-type-encoding">
+<h2>Content-Type Encoding<a class="headerlink" href="#content-type-encoding" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="api_guide.html#spanserver.SpanAPI" title="spanserver.SpanAPI"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpanAPI</span></code></a> natively handles the following http body mimetypes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>JSON (application/json)</p></li>
+<li><p>YAML (application/yaml)</p></li>
+<li><p>BSON (application/bson)</p></li>
+<li><p>TEXT (text/plain)</p></li>
+</ul>
+</div></blockquote>
+<p>Each of the supported mimetypes is represented as a string Enum in <a class="reference internal" href="api_guide.html#spanserver.MimeType" title="spanserver.MimeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">MimeType</span></code></a>.</p>
+<p>The mimetype of request body content is detailed on <a class="reference internal" href="api_guide.html#spanserver.Request.mimetype" title="spanserver.Request.mimetype"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.mimetype()</span></code></a>, which is
+determined by the <code class="docutils literal notranslate"><span class="pre">'Content-Type'</span></code> header. If it is one of the content types detailed
+above, a <a class="reference internal" href="api_guide.html#spanserver.MimeType" title="spanserver.MimeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">MimeType</span></code></a> enum value will be used, otherwise the raw text from the
+header will be present.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">MimeType</span><span class="p">,</span>
+
+
+<span class="n">grievous</span> <span class="o">=</span> <span class="n">SpanAPI</span><span class="p">()</span>
+
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/limbs/status&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">LimbsStatus</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MIMETYPE RECEIVED:&quot;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">mimetype</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">media</span><span class="p">()</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">data</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;/limbs/status&quot;</span><span class="p">,</span>
+    <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;upper-left&quot;</span><span class="p">:</span> <span class="s2">&quot;functional&quot;</span><span class="p">},</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MIMETYPE</span> <span class="n">RECEIVED</span><span class="p">:</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">JSON</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When selecting a mimetype, spanserver is somewhat forgiving in how the mimetype
+is detailed. All of the following <code class="docutils literal notranslate"><span class="pre">'Content-Type'</span></code> values will be treated as
+<code class="docutils literal notranslate"><span class="pre">MimeType.JSON</span></code>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>application/json</p></li>
+<li><p>application/JSON</p></li>
+<li><p>application/jSON</p></li>
+<li><p>application/x-json</p></li>
+<li><p>application/X-JSON</p></li>
+<li><p>json</p></li>
+<li><p>JSON</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Non-native mimetypes like <code class="docutils literal notranslate"><span class="pre">'text/csv'</span></code> must be an exact string match.</p>
+</div>
+<p>Response mime-types can be set by the request through the <code class="docutils literal notranslate"><span class="pre">'Accept'</span></code> request header.</p>
+<p>Round-trip YAML example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;/limbs/status&quot;</span><span class="p">,</span>
+    <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;upper-left&quot;</span><span class="p">:</span> <span class="s2">&quot;functional&quot;</span><span class="p">},</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;application/yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/yaml&quot;</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESPONSE YAML:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESPONSE HEADERS:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MIMETYPE</span> <span class="n">RECEIVED</span><span class="p">:</span> <span class="n">MimeType</span><span class="o">.</span><span class="n">YAML</span>
+<span class="n">RESPONSE</span> <span class="n">YAML</span><span class="p">:</span>
+<span class="n">upper</span><span class="o">-</span><span class="n">left</span><span class="p">:</span> <span class="n">functional</span>
+<span class="n">RESPONSE</span> <span class="n">HEADERS</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;application/x-yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;content-length&#39;</span><span class="p">:</span> <span class="s1">&#39;23&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="content-type-sniffing">
+<h2>Content-Type Sniffing<a class="headerlink" href="#content-type-sniffing" title="Permalink to this headline">¶</a></h2>
+<p>When <code class="docutils literal notranslate"><span class="pre">'Content-Type'</span></code> is not specified in the request header, spanserver will
+attempt to decode the content with every available decoder, until one does not throw
+an error.</p>
+<p>When registering custom encoders, make sure that they throw errors when they should.
+For instance, json will decode raw strings to a str object, so the built-in json
+decoder throws an error when the resulting object is not a dictionary or list.</p>
+<p>Response mimetype is resolved in the following order:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Mimetype set to <code class="xref py py-func docutils literal notranslate"><span class="pre">Response.mimetype()</span></code></p></li>
+<li><p>Mimetype in <cite>‘Accept’`</cite> request header.</p></li>
+<li><p>JSON for <code class="docutils literal notranslate"><span class="pre">dict</span></code> / <code class="docutils literal notranslate"><span class="pre">list</span></code> media values</p></li>
+<li><p>TEXT for <code class="docutils literal notranslate"><span class="pre">str</span></code> media.</p></li>
+<li><p>No action for <code class="docutils literal notranslate"><span class="pre">bytes</span></code> media values.</p></li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="content-type-handlers">
+<h2>Content-Type Handlers<a class="headerlink" href="#content-type-handlers" title="Permalink to this headline">¶</a></h2>
+<p>Custom encoders and decoders can be registered with the api, and can replace the default
+ones. Let’s register a couple to handle text/csv content.</p>
+<p>An encoder must take in a data object and turn it into bytes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+
+
+<span class="k">def</span> <span class="nf">csv_encode</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+    <span class="n">encoded</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">encoded</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">encoded</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Decoders must take in bytes and return python objects.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">csv_decode</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+    <span class="n">csv_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">csv_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now we can register them with our api:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grievous</span><span class="o">.</span><span class="n">register_mimetype</span><span class="p">(</span><span class="s2">&quot;text/csv&quot;</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="n">csv_encode</span><span class="p">,</span> <span class="n">decoder</span><span class="o">=</span><span class="n">csv_decode</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Wala! Our api now understands how to encode and decode csv’s</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/arms/status&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TestRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REQ MIMETYPE:&quot;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">mimetype</span><span class="p">)</span>
+
+        <span class="n">media</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">media</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REQ DECODED:&quot;</span><span class="p">,</span> <span class="n">media</span><span class="p">)</span>
+
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">media</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">mimetype</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">mimetype</span>
+
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;arm&quot;</span><span class="p">:</span> <span class="s2">&quot;upper_left&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;intact&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;arm&quot;</span><span class="p">:</span> <span class="s2">&quot;upper_right&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;destroyed&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+<span class="n">req_data</span> <span class="o">=</span> <span class="n">csv_encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="n">resp</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="s2">&quot;/arms/status&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;text/csv&quot;</span><span class="p">},</span> <span class="n">data</span><span class="o">=</span><span class="n">req_data</span>
+<span class="p">)</span>
+<span class="n">resp_data</span> <span class="o">=</span> <span class="n">csv_decode</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESP HEADERS:&quot;</span><span class="p">,</span> <span class="n">resp</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESP RAW:&quot;</span><span class="p">,</span> <span class="n">resp</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESP DATA:&quot;</span><span class="p">,</span> <span class="n">resp_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">REQ</span> <span class="n">MIMETYPE</span><span class="p">:</span> <span class="n">text</span><span class="o">/</span><span class="n">csv</span>
+<span class="n">REQ</span> <span class="n">DECODED</span><span class="p">:</span> <span class="p">[</span><span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;arm&#39;</span><span class="p">,</span> <span class="s1">&#39;upper_left&#39;</span><span class="p">),</span> <span class="o">...</span>
+<span class="n">RESP</span> <span class="n">HEADERS</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;text/csv&#39;</span><span class="p">,</span> <span class="s1">&#39;content-length&#39;</span><span class="p">:</span> <span class="s1">&#39;54&#39;</span><span class="p">}</span>
+<span class="n">RESP</span> <span class="n">RAW</span><span class="p">:</span> <span class="sa">b</span><span class="s1">&#39;arm,status</span><span class="se">\r\n</span><span class="s1">upper_left,intact</span><span class="se">\r\n</span><span class="s1">upper_right,destroyed</span><span class="se">\r\n</span><span class="s1">&#39;</span>
+<span class="n">RESP</span> <span class="n">DATA</span><span class="p">:</span> <span class="p">[</span><span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;arm&#39;</span><span class="p">,</span> <span class="s1">&#39;upper_left&#39;</span><span class="p">),</span> <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="request-data-validation">
+<h2>Request Data Validation<a class="headerlink" href="#request-data-validation" title="Permalink to this headline">¶</a></h2>
+<p>Lets design a data object and <a class="reference external" href="https://marshmallow.readthedocs.io/en/3.0/">marshmallow</a> schema to validate and load it</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">asdict</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">post_load</span><span class="p">,</span> <span class="n">pre_dump</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Enemy</span><span class="p">:</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span> <span class="nc">EnemySchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Military Rank.&quot;</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">Str</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;How the enemy is called.&quot;</span><span class="p">)</span>
+
+    <span class="nd">@pre_dump</span>
+    <span class="k">def</span> <span class="nf">convert_dataclass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Enemy</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">many</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@post_load</span>
+    <span class="k">def</span> <span class="nf">load_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">many</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">partial</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Enemy</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can use the <a class="reference internal" href="api_guide.html#spanserver.SpanAPI.use_schema" title="spanserver.SpanAPI.use_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">SpanAPI.use_schema()</span></code></a> to have json body information automatically
+validated and loaded. Loaded data can be accessed through <a class="reference internal" href="api_guide.html#spanserver.Request.media_loaded" title="spanserver.Request.media_loaded"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media_loaded()</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">RecordType</span>
+
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/quip&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">req</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">())</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">[</span><span class="n">RecordType</span><span class="p">,</span> <span class="n">Enemy</span><span class="p">],</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">media_loaded</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LOADED DATA:&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{data.title}</span><span class="s2"> </span><span class="si">{data.name}</span><span class="s2">, you are a bold one!&quot;</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/quip&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESPONSE:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>LOADED DATA: Enemy(title=&#39;General&#39;, name=&#39;Kenobi&#39;)
+
+&lt;Response [200]&gt;
+RESPONSE: 200 General Kenobi, you are a bold one!
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Request Type Hints</strong></p>
+<p>In the above example, two type hints were used in the request object:
+<code class="docutils literal notranslate"><span class="pre">req:</span> <span class="pre">Request[RecordType,</span> <span class="pre">Enemy]</span></code></p>
+<p><a class="reference internal" href="api_guide.html#spanserver.Request" title="spanserver.Request"><code class="xref py py-class docutils literal notranslate"><span class="pre">Request</span></code></a> is a generic-type class and can be assigned the types that
+<a class="reference internal" href="api_guide.html#spanserver.Request.media" title="spanserver.Request.media"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media()</span></code></a> and <a class="reference internal" href="api_guide.html#spanserver.Request.media_loaded" title="spanserver.Request.media_loaded"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media_loaded()</span></code></a> will produce when invoked. In
+this case, <a class="reference internal" href="api_guide.html#spanserver.Request.media" title="spanserver.Request.media"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media()</span></code></a> will produce a <a class="reference internal" href="api_guide.html#spanserver.RecordType" title="spanserver.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>
+(str, Any Mapping Alias) and <a class="reference internal" href="api_guide.html#spanserver.Request.media_loaded" title="spanserver.Request.media_loaded"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media_loaded()</span></code></a> will produce an
+<code class="docutils literal notranslate"><span class="pre">Enemy</span></code> object.</p>
+<p>Setting Request media type hints is purely optional, and included to facilitate
+IDE code-completion.</p>
+</div>
+<p>Error information appears in the headers of the response data when request validation
+fails. In the example below, the payload is missing the <code class="docutils literal notranslate"><span class="pre">title</span></code> field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/quip&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="n">a7b504b</span><span class="o">-</span><span class="mi">19</span><span class="n">f0</span><span class="o">-</span><span class="mi">473</span><span class="n">f</span><span class="o">-</span><span class="n">a3b0</span><span class="o">-</span><span class="mi">3</span><span class="n">dfa5dd128ce</span><span class="p">)</span> <span class="o">-</span> <span class="n">RequestValidationError</span> <span class="s2">&quot;...</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+   <span class="o">...</span>
+<span class="n">spanserver</span><span class="o">.</span><span class="n">errors_api</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">RequestValidationError</span><span class="p">:</span> <span class="n">Request</span> <span class="n">data</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">match</span> <span class="n">schema</span><span class="o">.</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;RequestValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Request data does not match schema.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;3a7b504b-19f0-473f-a3b0-3dfa5dd128ce&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">title</span><span class="se">\&quot;</span><span class="s2">: [</span><span class="se">\&quot;</span><span class="s2">Missing data for required field.</span><span class="se">\&quot;</span><span class="s2">]}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="request-schema-loadoptions">
+<h2>Request Schema LoadOptions<a class="headerlink" href="#request-schema-loadoptions" title="Permalink to this headline">¶</a></h2>
+<p>How request body data is processed can be controlled through the <code class="docutils literal notranslate"><span class="pre">req_load=</span></code> param
+To only validate the information:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spanserver</span> <span class="kn">import</span> <span class="n">LoadOptions</span>
+
+<span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/quip&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">req</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(),</span> <span class="n">req_load</span><span class="o">=</span><span class="n">LoadOptions</span><span class="o">.</span><span class="n">VALIDATE_ONLY</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">req</span><span class="o">.</span><span class="n">media_loaded</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LOADED DATA:&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{data[&#39;title&#39;]}</span><span class="s2"> </span><span class="si">{data[&#39;name&#39;]}</span><span class="s2">, you are a bold one!&quot;</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/quip&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;general&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RESP TEXT:&quot;</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>LOADED DATA: {&#39;title&#39;: &#39;general&#39;, &#39;name&#39;: &#39;Kenobi&#39;}
+
+&lt;Response [200]&gt;
+RESP TEXT: general Kenobi, you are a bold one!
+</pre></div>
+</div>
+<p>The possible options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>VALIDATE_AND_LOAD</strong>: (default) - Validates and loads data through the supplied
+schema’s <code class="docutils literal notranslate"><span class="pre">load</span></code> method.</p></li>
+<li><p><strong>VALIDATE_ONLY</strong>: Validates data through the supplied schema’s <code class="docutils literal notranslate"><span class="pre">validate</span></code>
+method. Decoded json/bson dict/list passed through to <a class="reference internal" href="api_guide.html#spanserver.Request.media_loaded" title="spanserver.Request.media_loaded"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media_loaded()</span></code></a></p></li>
+<li><p><strong>IGNORE</strong>: Data is not validated or loaded. Decoded json/bson dict/list passed
+through to <a class="reference internal" href="api_guide.html#spanserver.Request.media_loaded" title="spanserver.Request.media_loaded"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.media_loaded()</span></code></a> param without schema loading. Schema
+only used for API documentation.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="response-data-serialization">
+<h2>Response Data Serialization<a class="headerlink" href="#response-data-serialization" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="api_guide.html#spanserver.SpanAPI.use_schema" title="spanserver.SpanAPI.use_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">SpanAPI.use_schema()</span></code></a> can also be used to automatically serialize outgoing data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">resp</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">())</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">Enemy</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># test the route</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BODY:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">BODY</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="response-schema-options">
+<h2>Response Schema Options<a class="headerlink" href="#response-schema-options" title="Permalink to this headline">¶</a></h2>
+<p>Marshmallow does no validation when serializing objects, if we want to do a validation
+of the response data, we can alter the <code class="docutils literal notranslate"><span class="pre">resp_dump</span></code> option:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">resp</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(),</span> <span class="n">resp_dump</span><span class="o">=</span><span class="n">DumpOptions</span><span class="o">.</span><span class="n">VALIDATE_ONLY</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">}</span>
+
+<span class="c1"># test the request</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="n">fad52a8</span><span class="o">-</span><span class="mi">7</span><span class="n">c18</span><span class="o">-</span><span class="mi">4440</span><span class="o">-</span><span class="mi">8</span><span class="n">f9c</span><span class="o">-</span><span class="mi">1</span><span class="n">b2aad1639ac</span><span class="p">)</span> <span class="o">-</span> <span class="n">ResponseValidationError</span> <span class="s2">&quot;Request ...</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">400</span><span class="p">]</span><span class="o">&gt;</span>
+
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;ResponseValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;Request data does not match schema.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;1fad52a8-7c18-4440-8f9c-1b2aad1639ac&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1005&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-data&quot;</span><span class="p">:</span> <span class="s2">&quot;{</span><span class="se">\&quot;</span><span class="s2">name</span><span class="se">\&quot;</span><span class="s2">: [</span><span class="se">\&quot;</span><span class="s2">Missing data for required field.</span><span class="se">\&quot;</span><span class="s2">]}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;20&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This option assumes the data is already in a serialized form.</p>
+<p>The possible options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>DUMP_ONLY</strong>: (default) resp.media is passed to the supplied schema’s <code class="docutils literal notranslate"><span class="pre">dump</span></code>
+method. Marshmallow only performs minimal validation on dump, but if a validation
+error is thrown, the api will return a
+<a class="reference internal" href="api_guide.html#spanserver.errors_api.ResponseValidationError" title="spanserver.errors_api.ResponseValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">errors_api.ResponseValidationError</span></code></a>.</p></li>
+<li><p><strong>DUMP_AND_VALIDATE</strong>: resp.media is passed to the supplied schema’s <code class="docutils literal notranslate"><span class="pre">dump</span></code>
+method. The result is passed to the schema’s <code class="docutils literal notranslate"><span class="pre">validate</span></code> method. If validation
+errors occur during either step, <a class="reference internal" href="api_guide.html#spanserver.errors_api.ResponseValidationError" title="spanserver.errors_api.ResponseValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">errors_api.ResponseValidationError</span></code></a> is
+returned.</p></li>
+<li><p><strong>VALIDATE_ONLY</strong>: resp.media is passed to the supplied schema’s <code class="docutils literal notranslate"><span class="pre">validate</span></code>
+method. <a class="reference internal" href="api_guide.html#spanserver.errors_api.ResponseValidationError" title="spanserver.errors_api.ResponseValidationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">errors_api.ResponseValidationError</span></code></a> is returned on Validation
+errors.</p></li>
+<li><p><strong>IGNORE</strong>: No action is taken. Schema only used for API documentation.</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Validating response data can come with a big performance hit. The data is
+serialized first, then <em>fully deserialized</em> again to validate it. For large data
+structures, caution is advised.</p>
+</div>
+</div>
+<div class="section" id="response-data-projection">
+<h2>Response Data Projection<a class="headerlink" href="#response-data-projection" title="Permalink to this headline">¶</a></h2>
+<p>When using a response schema, the client can request a projection of the payload body
+to trim down the returned data.</p>
+<p>To suppress a field, add a url query param: <code class="docutils literal notranslate"><span class="pre">'project.{field_name}=0'</span></code>. Multiple fields
+can be defined this way.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;project.title&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BODY:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">BODY</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Or a set of fields to keep can be used with <code class="docutils literal notranslate"><span class="pre">'project.{field_name}=1'</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;project.title&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BODY:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">BODY</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you wish to handle projection logic within the route yourself:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">use_schema</span><span class="p">(</span><span class="n">resp</span><span class="o">=</span><span class="n">EnemySchema</span><span class="p">(</span><span class="n">partial</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PROJECTION:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">apply_projection</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">Enemy</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;Kenobi&quot;</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/current_target&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;project.title&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BODY:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;PROJECTION:&quot;</span>
+<span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+<span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">BODY</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;General&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenobi&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The projection is not automatically applied when <code class="docutils literal notranslate"><span class="pre">req.apply_projection</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Projection settings are accessed through <code class="docutils literal notranslate"><span class="pre">req.projection</span></code>, with <code class="docutils literal notranslate"><span class="pre">'projection.'</span></code>
+stripped from the keys.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For nested schemas, sub-fields can be set with dot delimiters, ie:
+<code class="docutils literal notranslate"><span class="pre">'project.field.subfield=1'</span></code></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While SpanAPI’s projection out-performs transmitting unnecessary fields
+to the client, it will never be as fast as a database query implementation, since
+the entire object must still be fetched and deserialized into python objects. When
+response speed is critical, it is recommended that projection logic be applied
+directly in db queries by the route.</p>
+<p>This feature is intended for an out-of-the box solution for proof of concept, or
+endpoints with small payloads and non-critical performance.</p>
+</div>
+</div>
+<div class="section" id="url-param-typing">
+<h2>URL Param Typing<a class="headerlink" href="#url-param-typing" title="Permalink to this headline">¶</a></h2>
+<p>Spanserver will automatically decode URL params to any type that can be cast from a
+string. Just add it to the type annotation of the parameter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ARM_STATUS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Functional&quot;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Destroyed&quot;</span><span class="p">,</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;Destroyed&quot;</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;Functional&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/arm/</span><span class="si">{arm_num}</span><span class="s2">/status&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ArmStatusRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">arm_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">ARM_STATUS</span><span class="p">[</span><span class="n">arm_num</span><span class="p">]</span>
+
+<span class="c1"># test the request</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/arm/1/status&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/arm/2/status&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Functional</span>
+<span class="n">Destroyed</span>
+</pre></div>
+</div>
+<p>If a value cannot be cast a <code class="xref py py-class docutils literal notranslate"><span class="pre">RequestValidationError</span></code> will be returned.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/arm/NotAnInt/status&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="n">fc071988</span><span class="o">-</span><span class="mi">7</span><span class="n">c11</span><span class="o">-</span><span class="mi">460</span><span class="n">b</span><span class="o">-</span><span class="mi">9</span><span class="n">aac</span><span class="o">-</span><span class="n">e67650bc673f</span><span class="p">)</span> <span class="o">-</span> <span class="n">RequestValidationError</span> <span class="o">...</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="n">spanserver</span><span class="o">.</span><span class="n">errors_api</span><span class="o">.</span><span class="n">_classes</span><span class="o">.</span><span class="n">RequestValidationError</span><span class="p">:</span> <span class="n">URL</span> <span class="n">param</span> <span class="p">{</span><span class="n">name</span><span class="p">}</span> <span class="n">could</span> <span class="o">...</span>
+
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-name&quot;</span><span class="p">:</span> <span class="s2">&quot;RequestValidationError&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-message&quot;</span><span class="p">:</span> <span class="s2">&quot;URL param </span><span class="si">{name}</span><span class="s2"> could not be cast to </span><span class="si">{loader}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-id&quot;</span><span class="p">:</span> <span class="s2">&quot;fc071988-7c11-460b-9aac-e67650bc673f&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;error-code&quot;</span><span class="p">:</span> <span class="s2">&quot;1003&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Unions are also allowed. The method will attempt to cast the param in the order of the
+types inside the Union, using the first type that is cast successfully.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="n">ARM_STATUS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;Functional&quot;</span><span class="p">,</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;Destroyed&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;upper-left&quot;</span><span class="p">:</span> <span class="s2">&quot;Functional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;upper-right&quot;</span><span class="p">:</span> <span class="s2">&quot;Destroyed&quot;</span>
+<span class="p">}</span>
+
+<span class="c1"># set up the route</span>
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/arm/</span><span class="si">{arm_id}</span><span class="s2">/status&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ArmStatusRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+        <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">arm_id</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">ARM_STATUS</span><span class="p">[</span><span class="n">arm_id</span><span class="p">]</span>
+
+<span class="c1"># test the request</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/arm/1/status&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+<span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/arm/upper-right/status&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Functional</span>
+<span class="n">Destroyed</span>
+</pre></div>
+</div>
+<p>In the above case it is important that <code class="docutils literal notranslate"><span class="pre">int</span></code> be listed first in the Union, since
+<code class="docutils literal notranslate"><span class="pre">str</span></code> will accept anything put in the URL.</p>
+</div>
+<div class="section" id="paging">
+<h2>Paging<a class="headerlink" href="#paging" title="Permalink to this headline">¶</a></h2>
+<p>Handling long lists of data through batch paging can be easily facilitated through the
+<a class="reference internal" href="api_guide.html#spanserver.SpanAPI.paged" title="spanserver.SpanAPI.paged"><code class="xref py py-func docutils literal notranslate"><span class="pre">SpanAPI.paged()</span></code></a> decorator.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">HANDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;TOP-LEFT&quot;</span><span class="p">,</span> <span class="s2">&quot;TOP-RIGHT&quot;</span><span class="p">,</span> <span class="s2">&quot;BOTTOM-LEFT&quot;</span><span class="p">,</span> <span class="s2">&quot;BOTTOM-RIGHT&quot;</span><span class="p">]</span>
+
+
+<span class="nd">@grievous</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/hands&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">QuipRoute</span><span class="p">(</span><span class="n">SpanRoute</span><span class="p">):</span>
+
+    <span class="nd">@grievous</span><span class="o">.</span><span class="n">paged</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">paging</span><span class="o">.</span><span class="n">limit</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">paging</span><span class="o">.</span><span class="n">offset</span>
+
+        <span class="n">resp</span><span class="o">.</span><span class="n">paging</span><span class="o">.</span><span class="n">total_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">HANDS</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="n">HANDS</span><span class="p">[</span><span class="n">offset</span><span class="p">:(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">limit</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">resp</span><span class="o">.</span><span class="n">media</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<p>In the above example, the maximum request item count per page is set to <code class="docutils literal notranslate"><span class="pre">4</span></code> through
+the decorator’s <code class="docutils literal notranslate"><span class="pre">limit=</span></code> param.</p>
+<p>The decorator will automatically add offset and limit information to
+<a class="reference internal" href="api_guide.html#spanserver.Request.paging" title="spanserver.Request.paging"><code class="xref py py-func docutils literal notranslate"><span class="pre">Request.paging()</span></code></a>, pulled from <code class="docutils literal notranslate"><span class="pre">paging-offset</span></code> and <code class="docutils literal notranslate"><span class="pre">paging-limit</span></code> request url
+parameters.</p>
+<p>By setting <code class="docutils literal notranslate"><span class="pre">resp.paging.total</span></code>, the decorator will automatically calculate a number of
+other helpful metrics, like how many total pages there are.</p>
+<p>Lets fetch the first page:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/hands&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;paging-limit&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATA:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">DATA</span><span class="p">:</span>
+<span class="p">[</span>
+    <span class="s2">&quot;TOP-LEFT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TOP-RIGHT&quot;</span>
+<span class="p">]</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-next&quot;</span><span class="p">:</span> <span class="s2">&quot;http://;/hands?paging-offset=2&amp;paging-limit=2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-current-page&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-offset&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-limit&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-total-pages&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-total-items&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;25&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The offset is assumed to be 0 if none is passed.</p>
+<p>Now we can use <code class="docutils literal notranslate"><span class="pre">paging-next</span></code> link to fetch the next two items:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">grievous</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;paging-next&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATA:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;HEADERS:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="n">DATA</span><span class="p">:</span>
+<span class="p">[</span>
+    <span class="s2">&quot;BOTTOM-LEFT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BOTTOM-RIGHT&quot;</span>
+<span class="p">]</span>
+<span class="n">HEADERS</span><span class="p">:</span>
+<span class="p">{</span>
+    <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-previous&quot;</span><span class="p">:</span> <span class="s2">&quot;http://;/hands?paging-offset=0&amp;paging-limit=2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-current-page&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-offset&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-limit&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-total-pages&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;paging-total-items&quot;</span><span class="p">:</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;content-length&quot;</span><span class="p">:</span> <span class="s2">&quot;31&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="testing.html" class="btn btn-neutral float-right" title="Testing Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="SpanServer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright &#39;2018, Illuscio&#39;
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
